@@ -2,6 +2,7 @@ using StudentManagementV1._5.Commands;
 using StudentManagementV1._5.Models;
 using StudentManagementV1._5.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace StudentManagementV1._5.ViewModels
         private string _selectedRole = "All";
         private bool _isLoading;
         private User _selectedUser;
+        private bool _showInactiveUsers = false;
+        private ObservableCollection<string> _availableRoles = new ObservableCollection<string>();
 
         public ObservableCollection<User> Users
         {
@@ -52,6 +55,24 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        public bool ShowInactiveUsers
+        {
+            get => _showInactiveUsers;
+            set
+            {
+                if (SetProperty(ref _showInactiveUsers, value))
+                {
+                    LoadUsersAsync();
+                }
+            }
+        }
+
+        public ObservableCollection<string> AvailableRoles
+        {
+            get => _availableRoles;
+            set => SetProperty(ref _availableRoles, value);
+        }
+
         public bool IsLoading
         {
             get => _isLoading;
@@ -80,6 +101,13 @@ namespace StudentManagementV1._5.ViewModels
             DeleteUserCommand = new RelayCommand(async param => await DeleteUserAsync(param as User), param => param != null);
             BackCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.AdminDashboard));
 
+            // Initialize available roles
+            AvailableRoles.Add("All");
+            AvailableRoles.Add("Admin");
+            AvailableRoles.Add("Teacher");
+            AvailableRoles.Add("Student");
+
+            // Load users when ViewModel is created
             LoadUsersAsync();
         }
 
@@ -88,41 +116,16 @@ namespace StudentManagementV1._5.ViewModels
             try
             {
                 IsLoading = true;
-                Users.Clear();
-
-                string query = "SELECT * FROM Users WHERE 1=1";
-                var parameters = new Dictionary<string, object>();
-
-                if (_selectedRole != "All")
-                {
-                    query += " AND Role = @Role";
-                    parameters["@Role"] = _selectedRole;
-                }
-
-                if (!string.IsNullOrWhiteSpace(_searchText))
-                {
-                    query += " AND (Username LIKE @Search OR Email LIKE @Search)";
-                    parameters["@Search"] = $"%{_searchText}%";
-                }
-
-                query += " ORDER BY Username";
-
+                
+                string query = BuildUserQuery();
+                var parameters = BuildQueryParameters();
                 DataTable result = await _databaseService.ExecuteQueryAsync(query, parameters);
-
-                // Process the results
-                foreach (DataRow row in result.Rows)
-                {
-                    Users.Add(new User
-                    {
-                        UserID = Convert.ToInt32(row["UserID"]),
-                        Username = row["Username"].ToString() ?? string.Empty,
-                        Email = row["Email"].ToString() ?? string.Empty,
-                        Role = row["Role"].ToString() ?? string.Empty,
-                        IsActive = Convert.ToBoolean(row["IsActive"]),
-                        CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                        LastLoginDate = row["LastLoginDate"] != DBNull.Value ? Convert.ToDateTime(row["LastLoginDate"]) : null
-                    });
-                }
+                
+                // Update UI on the dispatcher thread to avoid collection modified exception
+                Application.Current.Dispatcher.Invoke(() => {
+                    Users.Clear();
+                    PopulateUsersFromDataTable(result);
+                });
             }
             catch (Exception ex)
             {
@@ -131,6 +134,96 @@ namespace StudentManagementV1._5.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+        
+        private string BuildUserQuery()
+        {
+            string query = @"
+                SELECT 
+                    u.UserID, 
+                    u.Username, 
+                    u.Email, 
+                    u.Role, 
+                    u.IsActive, 
+                    u.CreatedDate, 
+                    u.LastLoginDate,
+                    CASE 
+                        WHEN u.Role = 'Teacher' THEN (SELECT FirstName + ' ' + LastName FROM Teachers t WHERE t.UserID = u.UserID)
+                        WHEN u.Role = 'Student' THEN (SELECT FirstName + ' ' + LastName FROM Students s WHERE s.UserID = u.UserID)
+                        ELSE u.Username
+                    END AS FullName
+                FROM Users u
+                WHERE 1=1";
+            
+            // Apply role filter
+            if (_selectedRole != "All")
+            {
+                query += " AND u.Role = @Role";
+            }
+            
+            // Apply active status filter
+            if (!_showInactiveUsers)
+            {
+                query += " AND u.IsActive = 1";
+            }
+            
+            // Apply search filter
+            if (!string.IsNullOrWhiteSpace(_searchText))
+            {
+                query += @" AND (
+                    u.Username LIKE @Search 
+                    OR u.Email LIKE @Search 
+                    OR (u.Role = 'Teacher' AND EXISTS (
+                        SELECT 1 FROM Teachers t 
+                        WHERE t.UserID = u.UserID 
+                        AND (t.FirstName LIKE @Search OR t.LastName LIKE @Search)
+                    ))
+                    OR (u.Role = 'Student' AND EXISTS (
+                        SELECT 1 FROM Students s 
+                        WHERE s.UserID = u.UserID 
+                        AND (s.FirstName LIKE @Search OR s.LastName LIKE @Search)
+                    ))
+                )";
+            }
+            
+            query += " ORDER BY u.Username";
+            
+            return query;
+        }
+        
+        private Dictionary<string, object> BuildQueryParameters()
+        {
+            var parameters = new Dictionary<string, object>();
+            
+            if (_selectedRole != "All")
+            {
+                parameters["@Role"] = _selectedRole;
+            }
+            
+            if (!string.IsNullOrWhiteSpace(_searchText))
+            {
+                parameters["@Search"] = $"%{_searchText}%";
+            }
+            
+            return parameters;
+        }
+        
+        private void PopulateUsersFromDataTable(DataTable dataTable)
+        {
+            foreach (DataRow row in dataTable.Rows)
+            {
+                Users.Add(new User
+                {
+                    UserID = Convert.ToInt32(row["UserID"]),
+                    Username = row["Username"].ToString() ?? string.Empty,
+                    Email = row["Email"].ToString() ?? string.Empty,
+                    Role = row["Role"].ToString() ?? string.Empty,
+                    FullName = row["FullName"].ToString() ?? string.Empty,
+                    IsActive = Convert.ToBoolean(row["IsActive"]),
+                    CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
+                    LastLoginDate = row["LastLoginDate"] != DBNull.Value ? Convert.ToDateTime(row["LastLoginDate"]) : null
+                });
             }
         }
 

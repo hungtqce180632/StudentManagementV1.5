@@ -1,0 +1,101 @@
+<!-- filepath: c:\Users\truon\Desktop\StudentManagementV1.5\StudentManagementV1.5\Views\NotificationManagementView.xaml -->
+<UserControl x:Class="StudentManagementV1._5.Views.NotificationManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StudentManagementV1._5.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Notification Management" FontSize="24" FontWeight="Bold" Margin="10"/>
+
+        <!-- Filters -->
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0,0,10,0" Padding="5" ToolTip="Search by title or message content"/>
+            
+            <ComboBox Grid.Column="1" ItemsSource="{Binding RecipientTypeFilters}" 
+                      SelectedItem="{Binding SelectedRecipientTypeFilter}"
+                      Width="120" Margin="0,0,10,0"/>
+            
+            <CheckBox Grid.Column="2" Content="Show Expired" 
+                      IsChecked="{Binding ShowExpired}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            
+            <Button Grid.Column="3" Content="Create Notification" Command="{Binding CreateNotificationCommand}" 
+                    Padding="10,5" Background="#4CAF50" Foreground="White"/>
+        </Grid>
+
+        <!-- Notification List -->
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Notifications}" SelectedItem="{Binding SelectedNotification}"
+                  AutoGenerateColumns="False" IsReadOnly="True" Margin="10"
+                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#DDDDDD"
+                  CanUserSortColumns="True" CanUserResizeColumns="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding NotificationID}" Width="50"/>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="200"/>
+                <DataGridTextColumn Header="Recipient Type" Binding="{Binding RecipientType}" Width="120"/>
+                <DataGridTextColumn Header="Recipient" Binding="{Binding RecipientName}" Width="150"/>
+                <DataGridTextColumn Header="Created Date" Binding="{Binding CreatedDate, StringFormat=\{0:yyyy-MM-dd HH:mm\}}" Width="150"/>
+                <DataGridTextColumn Header="Expiry Date" Binding="{Binding ExpiryDate, StringFormat=\{0:yyyy-MM-dd HH:mm\}}" Width="150"/>
+                <DataGridTemplateColumn Header="Status" Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding StatusDisplay}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Actions" Width="180">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="View" 
+                                        Command="{Binding DataContext.ViewNotificationCommand, 
+                                            RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                        CommandParameter="{Binding}"
+                                        Margin="0,0,5,0" Padding="5,2" Background="#2196F3" Foreground="White"/>
+                                <Button Content="Edit" 
+                                        Command="{Binding DataContext.EditNotificationCommand, 
+                                            RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                        CommandParameter="{Binding}"
+                                        Margin="0,0,5,0" Padding="5,2" Background="#FF9800" Foreground="White"/>
+                                <Button Content="Delete" 
+                                        Command="{Binding DataContext.DeleteNotificationCommand, 
+                                            RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                        CommandParameter="{Binding}"
+                                        Padding="5,2" Background="#F44336" Foreground="White"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Footer -->
+        <Button Grid.Row="3" Content="Back to Dashboard" Command="{Binding BackCommand}" 
+                HorizontalAlignment="Left" Margin="10" Padding="10,5"/>
+
+        <!-- Loading Overlay -->
+        <Grid Grid.RowSpan="4" Background="#80000000" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Loading..." Foreground="White" FontSize="16" HorizontalAlignment="Center"/>
+                <ProgressBar IsIndeterminate="True" Width="200" Height="10" Margin="0,10,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
