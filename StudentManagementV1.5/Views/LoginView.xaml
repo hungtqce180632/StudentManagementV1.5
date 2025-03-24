@@ -1,0 +1,86 @@
+<UserControl x:Class="StudentManagementV1._5.Views.LoginView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StudentManagementV1._5.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    
+    <Grid Background="#F5F5F5">
+        <Border Width="350" Height="400" 
+                Background="White" 
+                CornerRadius="10" 
+                BorderBrush="#DDDDDD" 
+                BorderThickness="1"
+                Padding="20">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="10" Color="#DDDDDD" ShadowDepth="2" Opacity="0.3"/>
+            </Border.Effect>
+            
+            <StackPanel>
+                <TextBlock Text="Student Management System" 
+                           HorizontalAlignment="Center"
+                           FontSize="20" 
+                           FontWeight="Bold" 
+                           Margin="0,0,0,30"/>
+                
+                <TextBlock Text="Login" 
+                           HorizontalAlignment="Center"
+                           FontSize="16" 
+                           FontWeight="SemiBold" 
+                           Margin="0,0,0,20"/>
+
+                <TextBlock Text="Username" 
+                           Margin="0,0,0,5" 
+                           FontWeight="Medium" 
+                           FontSize="13"/>
+                <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" 
+                         Height="35" 
+                         Padding="5,7,5,5"
+                         Margin="0,0,0,15" 
+                         BorderBrush="#CCCCCC"/>
+
+                <TextBlock Text="Password" 
+                           Margin="0,0,0,5" 
+                           FontWeight="Medium" 
+                           FontSize="13"/>
+                <PasswordBox x:Name="PasswordBox" 
+                             Height="35" 
+                             Padding="5,7,5,5"
+                             Margin="0,0,0,5" 
+                             BorderBrush="#CCCCCC"/>
+
+                <!-- For binding password -->
+                <TextBlock Text="{Binding Password, Mode=OneWayToSource}" Visibility="Collapsed"/>
+
+                <TextBlock TextWrapping="Wrap"
+                           Text="{Binding ErrorMessage}" 
+                           Foreground="Red" 
+                           Margin="0,5,0,15" 
+                           HorizontalAlignment="Center"/>
+
+                <Button Content="Login" 
+                        Command="{Binding LoginCommand}"
+                        Height="35" 
+                        Margin="0,10,0,15" 
+                        Background="#2196F3" 
+                        Foreground="White" 
+                        FontWeight="SemiBold"
+                        BorderThickness="0">
+                    <Button.Resources>
+                        <Style TargetType="{x:Type Border}">
+                            <Setter Property="CornerRadius" Value="3"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <TextBlock HorizontalAlignment="Center">
+                    <Hyperlink Command="{Binding ForgotPasswordCommand}">
+                        Forgot Password?
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

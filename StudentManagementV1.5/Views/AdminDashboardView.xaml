@@ -1,0 +1,157 @@
+<UserControl x:Class="StudentManagementV1._5.Views.AdminDashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StudentManagementV1._5.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="650" d:DesignWidth="1100">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Navigation Panel -->
+        <Border Grid.Column="0" Background="#1E88E5" Padding="15">
+            <StackPanel>
+                <TextBlock Text="Student Management" 
+                           FontSize="20" 
+                           Foreground="White" 
+                           FontWeight="Bold" 
+                           Margin="0,20,0,40"
+                           TextAlignment="Center"/>
+
+                <TextBlock Text="{Binding WelcomeMessage}" 
+                           Foreground="White" 
+                           FontSize="14" 
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,30" 
+                           TextAlignment="Center"/>
+
+                <!-- Navigation Buttons -->
+                <Button Content="Dashboard" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10" 
+                        IsEnabled="False"/>
+                
+                <Button Content="User Management" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="Class Management" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="Subject Management" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="Reports" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="Settings" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+
+                <!-- Logout Button at bottom -->
+                <Button Content="Logout" 
+                        Command="{Binding LogoutCommand}"
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,100,0,0"
+                        Background="#f44336"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Column="1" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Page Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Text="Admin Dashboard" 
+                           FontSize="24" 
+                           FontWeight="Bold" 
+                           Margin="0,0,0,10"/>
+                <TextBlock Text="Welcome to the administrative panel. Manage your school data from here." 
+                           Opacity="0.7"
+                           TextWrapping="Wrap"/>
+                <Separator Margin="0,15,0,0"/>
+            </StackPanel>
+
+            <!-- Dashboard Content -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Stats Cards -->
+                <WrapPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,20">
+                    <!-- Students Card -->
+                    <Border Style="{StaticResource StatCard}" Background="#4CAF50">
+                        <StackPanel>
+                            <TextBlock Text="Students" Style="{StaticResource StatTitle}"/>
+                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="Total Students" Style="{StaticResource StatDesc}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Teachers Card -->
+                    <Border Style="{StaticResource StatCard}" Background="#2196F3">
+                        <StackPanel>
+                            <TextBlock Text="Teachers" Style="{StaticResource StatTitle}"/>
+                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="Total Teachers" Style="{StaticResource StatDesc}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Classes Card -->
+                    <Border Style="{StaticResource StatCard}" Background="#FF9800">
+                        <StackPanel>
+                            <TextBlock Text="Classes" Style="{StaticResource StatTitle}"/>
+                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="Active Classes" Style="{StaticResource StatDesc}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Subjects Card -->
+                    <Border Style="{StaticResource StatCard}" Background="#9C27B0">
+                        <StackPanel>
+                            <TextBlock Text="Subjects" Style="{StaticResource StatTitle}"/>
+                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="Total Subjects" Style="{StaticResource StatDesc}"/>
+                        </StackPanel>
+                    </Border>
+                </WrapPanel>
+
+                <!-- Recent Users -->
+                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource ContentPanel}" Margin="0,0,10,0">
+                    <StackPanel>
+                        <TextBlock Text="Recent Users" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock Text="No users to display" Margin="0,50,0,0" HorizontalAlignment="Center" Opacity="0.5"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Quick Actions -->
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource ContentPanel}" Margin="10,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Quick Actions" Style="{StaticResource SectionTitle}"/>
+                        <Button Content="Add New Student" Margin="0,10,0,5" Padding="10,5"/>
+                        <Button Content="Add New Teacher" Margin="0,5,0,5" Padding="10,5"/>
+                        <Button Content="Create New Class" Margin="0,5,0,5" Padding="10,5"/>
+                        <Button Content="Create System Backup" Margin="0,5,0,5" Padding="10,5"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>
