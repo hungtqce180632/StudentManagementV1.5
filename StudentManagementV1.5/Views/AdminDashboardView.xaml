@@ -29,29 +29,39 @@
                            Margin="0,0,0,30" 
                            TextAlignment="Center"/>
 
-                <!-- Navigation Buttons -->
+                <!-- Navigation Buttons - Added Command bindings -->
                 <Button Content="Dashboard" 
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10" 
                         IsEnabled="False"/>
                 
                 <Button Content="User Management" 
+                        Command="{Binding NavigateToUserManagementCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
                 
                 <Button Content="Class Management" 
+                        Command="{Binding NavigateToClassManagementCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
                 
                 <Button Content="Subject Management" 
+                        Command="{Binding NavigateToSubjectManagementCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
                 
-                <Button Content="Reports" 
+                <Button Content="Exams &amp; Scores" 
+                        Command="{Binding NavigateToExamManagementCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
                 
-                <Button Content="Settings" 
+                <Button Content="Schedules" 
+                        Command="{Binding NavigateToScheduleManagementCommand}"
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="Notifications" 
+                        Command="{Binding NavigateToNotificationManagementCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
 
@@ -94,13 +104,13 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Stats Cards -->
+                <!-- Stats Cards - Added data binding to display counts -->
                 <WrapPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,20">
                     <!-- Students Card -->
                     <Border Style="{StaticResource StatCard}" Background="#4CAF50">
                         <StackPanel>
                             <TextBlock Text="Students" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="{Binding StudentCount}" Style="{StaticResource StatValue}"/>
                             <TextBlock Text="Total Students" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -109,7 +119,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#2196F3">
                         <StackPanel>
                             <TextBlock Text="Teachers" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="{Binding TeacherCount}" Style="{StaticResource StatValue}"/>
                             <TextBlock Text="Total Teachers" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -118,7 +128,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#FF9800">
                         <StackPanel>
                             <TextBlock Text="Classes" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="{Binding ClassCount}" Style="{StaticResource StatValue}"/>
                             <TextBlock Text="Active Classes" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -127,7 +137,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#9C27B0">
                         <StackPanel>
                             <TextBlock Text="Subjects" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="{Binding SubjectCount}" Style="{StaticResource StatValue}"/>
                             <TextBlock Text="Total Subjects" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -137,18 +147,59 @@
                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource ContentPanel}" Margin="0,0,10,0">
                     <StackPanel>
                         <TextBlock Text="Recent Users" Style="{StaticResource SectionTitle}"/>
-                        <TextBlock Text="No users to display" Margin="0,50,0,0" HorizontalAlignment="Center" Opacity="0.5"/>
+                        <ListView ItemsSource="{Binding RecentUsers}" MaxHeight="300" BorderThickness="0">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Ellipse Width="32" Height="32" Fill="#E0E0E0" Margin="0,0,10,0"/>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="{Binding Username}" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding Role}" Opacity="0.7" FontSize="12"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Padding" Value="10,5"/>
+                                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                    <Setter Property="BorderBrush" Value="#EEEEEE"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                        </ListView>
+                        <TextBlock Text="No users to display" 
+                                   Margin="0,50,0,0" 
+                                   HorizontalAlignment="Center" 
+                                   Opacity="0.5"
+                                   Visibility="{Binding HasRecentUsers, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                     </StackPanel>
                 </Border>
 
-                <!-- Quick Actions -->
+                <!-- Quick Actions - Added Command bindings -->
                 <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource ContentPanel}" Margin="10,0,0,0">
                     <StackPanel>
                         <TextBlock Text="Quick Actions" Style="{StaticResource SectionTitle}"/>
-                        <Button Content="Add New Student" Margin="0,10,0,5" Padding="10,5"/>
-                        <Button Content="Add New Teacher" Margin="0,5,0,5" Padding="10,5"/>
-                        <Button Content="Create New Class" Margin="0,5,0,5" Padding="10,5"/>
-                        <Button Content="Create System Backup" Margin="0,5,0,5" Padding="10,5"/>
+                        <Button Content="Add New Student" 
+                                Command="{Binding AddNewStudentCommand}"
+                                Margin="0,10,0,5" 
+                                Padding="10,5"/>
+                        <Button Content="Add New Teacher" 
+                                Command="{Binding AddNewTeacherCommand}"
+                                Margin="0,5,0,5" 
+                                Padding="10,5"/>
+                        <Button Content="Create New Class" 
+                                Command="{Binding CreateNewClassCommand}"
+                                Margin="0,5,0,5" 
+                                Padding="10,5"/>
+                        <Button Content="Create System Backup" 
+                                Command="{Binding CreateSystemBackupCommand}"
+                                Margin="0,5,0,5" 
+                                Padding="10,5"/>
                     </StackPanel>
                 </Border>
             </Grid>

@@ -3,6 +3,7 @@ using StudentManagementV1._5.Models;
 using StudentManagementV1._5.Services;
 using System;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -19,6 +20,7 @@ namespace StudentManagementV1._5.ViewModels
         private string _searchText = string.Empty;
         private string _selectedRole = "All";
         private bool _isLoading;
+        private User _selectedUser;
 
         public ObservableCollection<User> Users
         {
@@ -56,6 +58,12 @@ namespace StudentManagementV1._5.ViewModels
             set => SetProperty(ref _isLoading, value);
         }
 
+        public User SelectedUser
+        {
+            get => _selectedUser;
+            set => SetProperty(ref _selectedUser, value);
+        }
+
         public ICommand AddUserCommand { get; }
         public ICommand EditUserCommand { get; }
         public ICommand DeleteUserCommand { get; }
@@ -68,27 +76,53 @@ namespace StudentManagementV1._5.ViewModels
             _navigationService = navigationService;
 
             AddUserCommand = new RelayCommand(param => OpenAddUserDialog());
-            EditUserCommand = new RelayCommand(param => OpenEditUserDialog(param as User));
-            DeleteUserCommand = new RelayCommand(param => DeleteUserAsync(param as User));
+            EditUserCommand = new RelayCommand(param => OpenEditUserDialog(param as User), param => param != null);
+            DeleteUserCommand = new RelayCommand(async param => await DeleteUserAsync(param as User), param => param != null);
             BackCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.AdminDashboard));
 
             LoadUsersAsync();
         }
 
-        private async Task LoadUsersAsync()
+        private async void LoadUsersAsync()
         {
             try
             {
                 IsLoading = true;
-                
-                // Implement database loading logic here
-                // For now, add sample data
-                Users = new ObservableCollection<User>
+                Users.Clear();
+
+                string query = "SELECT * FROM Users WHERE 1=1";
+                var parameters = new Dictionary<string, object>();
+
+                if (_selectedRole != "All")
                 {
-                    new User { UserID = 1, Username = "admin", Email = "admin@school.com", Role = "Admin", IsActive = true, CreatedDate = DateTime.Now.AddDays(-30) },
-                    new User { UserID = 2, Username = "teacher1", Email = "teacher1@school.com", Role = "Teacher", IsActive = true, CreatedDate = DateTime.Now.AddDays(-25) },
-                    new User { UserID = 3, Username = "student1", Email = "student1@school.com", Role = "Student", IsActive = true, CreatedDate = DateTime.Now.AddDays(-20) }
-                };
+                    query += " AND Role = @Role";
+                    parameters["@Role"] = _selectedRole;
+                }
+
+                if (!string.IsNullOrWhiteSpace(_searchText))
+                {
+                    query += " AND (Username LIKE @Search OR Email LIKE @Search)";
+                    parameters["@Search"] = $"%{_searchText}%";
+                }
+
+                query += " ORDER BY Username";
+
+                DataTable result = await _databaseService.ExecuteQueryAsync(query, parameters);
+
+                // Process the results
+                foreach (DataRow row in result.Rows)
+                {
+                    Users.Add(new User
+                    {
+                        UserID = Convert.ToInt32(row["UserID"]),
+                        Username = row["Username"].ToString() ?? string.Empty,
+                        Email = row["Email"].ToString() ?? string.Empty,
+                        Role = row["Role"].ToString() ?? string.Empty,
+                        IsActive = Convert.ToBoolean(row["IsActive"]),
+                        CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
+                        LastLoginDate = row["LastLoginDate"] != DBNull.Value ? Convert.ToDateTime(row["LastLoginDate"]) : null
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -102,28 +136,61 @@ namespace StudentManagementV1._5.ViewModels
 
         private void OpenAddUserDialog()
         {
-            // Implement dialog to add user
-            MessageBox.Show("Add user functionality will be implemented here", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Show dialog to add new user
+            MessageBox.Show("Add user functionality will be implemented here", "Information", 
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void OpenEditUserDialog(User user)
         {
             if (user == null) return;
             
-            // Implement dialog to edit user
-            MessageBox.Show($"Edit user functionality for {user.Username} will be implemented here", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Show dialog to edit user
+            MessageBox.Show($"Edit user {user.Username} functionality will be implemented here", 
+                "Information", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private async Task DeleteUserAsync(User user)
         {
             if (user == null) return;
 
-            var result = MessageBox.Show($"Are you sure you want to delete {user.Username}?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            // Confirm deletion
+            var result = MessageBox.Show($"Are you sure you want to delete {user.Username}?", 
+                "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             
             if (result == MessageBoxResult.Yes)
             {
-                // Implement user deletion here
-                MessageBox.Show($"User {user.Username} would be deleted here", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                try
+                {
+                    IsLoading = true;
+
+                    // Check if this is the currently logged-in user
+                    if (user.UserID == _authService.CurrentUser?.UserID)
+                    {
+                        MessageBox.Show("You cannot delete your own account while logged in.", 
+                            "Operation Not Allowed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    // Instead of actually deleting, we'll set IsActive = 0
+                    string query = $"UPDATE Users SET IsActive = 0 WHERE UserID = {user.UserID}";
+                    await _databaseService.ExecuteNonQueryAsync(query);
+
+                    // Refresh the list
+                    LoadUsersAsync();
+
+                    MessageBox.Show($"User {user.Username} has been deactivated.", 
+                        "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error deleting user: {ex.Message}", 
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    IsLoading = false;
+                }
             }
         }
     }

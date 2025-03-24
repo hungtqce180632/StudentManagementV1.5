@@ -26,10 +26,15 @@ CREATE TABLE Users (
     LastLoginDate DATETIME NULL
 );
 
--- Classes Table
+-- Classes Table - Updated with additional columns
 CREATE TABLE Classes (
     ClassID INT PRIMARY KEY IDENTITY(1,1),
     ClassName NVARCHAR(50) NOT NULL,
+    Grade NVARCHAR(20) NULL,
+    TeacherID INT NULL,
+    ClassRoom NVARCHAR(30) NULL,
+    MaxCapacity INT DEFAULT 30,
+    CurrentStudentCount INT DEFAULT 0,
     AcademicYear NVARCHAR(20) NOT NULL,
     IsActive BIT DEFAULT 1
 );
@@ -61,6 +66,10 @@ CREATE TABLE Teachers (
     HireDate DATE DEFAULT GETDATE(),
     Specialization NVARCHAR(100)
 );
+
+-- Add foreign key constraint after both tables exist
+ALTER TABLE Classes
+ADD CONSTRAINT FK_Classes_Teachers FOREIGN KEY (TeacherID) REFERENCES Teachers(TeacherID);
 
 -- Subjects Table
 CREATE TABLE Subjects (
