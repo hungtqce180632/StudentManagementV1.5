@@ -7,10 +7,150 @@
              mc:Ignorable="d" 
              d:DesignHeight="650" d:DesignWidth="1100">
     <Grid>
-        <TextBlock Text="Student Dashboard" 
-                   FontSize="24" 
-                   FontWeight="Bold"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Navigation Panel -->
+        <Border Grid.Column="0" Background="#1E88E5" Padding="15">
+            <StackPanel>
+                <TextBlock Text="Student Portal" 
+                           FontSize="20" 
+                           Foreground="White" 
+                           FontWeight="Bold" 
+                           Margin="0,20,0,40"
+                           TextAlignment="Center"/>
+
+                <TextBlock Text="{Binding WelcomeMessage}" 
+                           Foreground="White" 
+                           FontSize="14" 
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,30" 
+                           TextAlignment="Center"/>
+
+                <!-- Navigation Buttons -->
+                <Button Content="Dashboard" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10" 
+                        IsEnabled="False"/>
+                
+                <Button Content="My Courses" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="Assignments" 
+                        Command="{Binding NavigateToViewAssignmentsCommand}"
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="My Submissions" 
+                        Command="{Binding NavigateToSubmissionManagementCommand}"
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="My Schedule" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="Notifications" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+
+                <!-- Logout Button at bottom -->
+                <Button Content="Logout" 
+                        Command="{Binding LogoutCommand}"
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,100,0,0"
+                        Background="#f44336"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Column="1" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Page Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Text="Student Dashboard" 
+                           FontSize="24" 
+                           FontWeight="Bold" 
+                           Margin="0,0,0,10"/>
+                <TextBlock Text="Welcome to your student portal. View your assignments and grades here." 
+                           Opacity="0.7"
+                           TextWrapping="Wrap"/>
+                <Separator Margin="0,15,0,0"/>
+            </StackPanel>
+
+            <!-- Dashboard Content -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Stats Cards -->
+                <WrapPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,20">
+                    <!-- Subjects Card -->
+                    <Border Style="{StaticResource StatCard}" Background="#4CAF50">
+                        <StackPanel>
+                            <TextBlock Text="Subjects" Style="{StaticResource StatTitle}"/>
+                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="Enrolled Subjects" Style="{StaticResource StatDesc}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Assignments Card -->
+                    <Border Style="{StaticResource StatCard}" Background="#2196F3">
+                        <StackPanel>
+                            <TextBlock Text="Assignments" Style="{StaticResource StatTitle}"/>
+                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="Pending Assignments" Style="{StaticResource StatDesc}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Submissions Card -->
+                    <Border Style="{StaticResource StatCard}" Background="#FF9800">
+                        <StackPanel>
+                            <TextBlock Text="Submissions" Style="{StaticResource StatTitle}"/>
+                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="Submitted Work" Style="{StaticResource StatDesc}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Overall GPA Card -->
+                    <Border Style="{StaticResource StatCard}" Background="#9C27B0">
+                        <StackPanel>
+                            <TextBlock Text="GPA" Style="{StaticResource StatTitle}"/>
+                            <TextBlock Text="0.0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="Overall GPA" Style="{StaticResource StatDesc}"/>
+                        </StackPanel>
+                    </Border>
+                </WrapPanel>
+
+                <!-- Upcoming Assignments -->
+                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource ContentPanel}" Margin="0,0,10,0">
+                    <StackPanel>
+                        <TextBlock Text="Upcoming Assignments" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock Text="No upcoming assignments" Margin="0,50,0,0" HorizontalAlignment="Center" Opacity="0.5"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Recent Grades -->
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource ContentPanel}" Margin="10,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Recent Grades" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock Text="No recent grades" Margin="0,50,0,0" HorizontalAlignment="Center" Opacity="0.5"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

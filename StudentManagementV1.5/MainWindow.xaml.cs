@@ -100,12 +100,19 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         return view switch
         {
+            // Basic views
             AppViews.Login => new LoginView { DataContext = new LoginViewModel(_authService, _navigationService) },
             AppViews.PasswordReset => new PasswordResetView { DataContext = new PasswordResetViewModel(_authService, _emailService, _navigationService) },
+            
+            // Dashboard views
             AppViews.AdminDashboard => new AdminDashboardView { DataContext = new AdminDashboardViewModel(_authService, _navigationService) },
             AppViews.TeacherDashboard => new TeacherDashboardView { DataContext = new TeacherDashboardViewModel(_authService, _navigationService) },
             AppViews.StudentDashboard => new StudentDashboardView { DataContext = new StudentDashboardViewModel(_authService, _navigationService) },
-            // Add other views as needed
+            
+            // Admin management views
+            AppViews.UserManagement => new UserManagementView { DataContext = new UserManagementViewModel(_databaseService, _authService, _navigationService) },
+            
+            // Add the rest of the views as you implement them
             _ => throw new System.NotImplementedException($"View {view} is not implemented")
         };
     }

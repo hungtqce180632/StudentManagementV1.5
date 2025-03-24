@@ -24,7 +24,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             
-            <TextBox Grid.Column="0" PlaceholderText="Search users..." Margin="0,0,10,0" Padding="5"/>
+            <TextBox Grid.Column="0" ToolTip="Search users..." Margin="0,0,10,0" Padding="5"/>
             <ComboBox Grid.Column="1" Width="120" Margin="0,0,10,0">
                 <ComboBoxItem Content="All Users" IsSelected="True"/>
                 <ComboBoxItem Content="Admin"/>
