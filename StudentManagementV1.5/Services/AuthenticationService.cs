@@ -36,14 +36,16 @@ namespace StudentManagementV1._5.Services
             var userRow = result.Rows[0];
             bool isAuthenticated = false;
             string role = userRow["Role"].ToString() ?? string.Empty;
+            byte[] storedSalt = (byte[])userRow["PasswordSalt"];
 
-            // Special case for admin accounts which was created directly in SQL
-            // Check either by username or role
-            if (username.ToLower() == "admin" || 
+            // Check if this is a SQL-created account (without proper salt - admin/test accounts)
+            // This applies to both admin and test teacher/student accounts created directly in SQL
+            if (storedSalt.Length == 0 || 
+                username.ToLower() == "admin" || 
                 username.ToLower() == "administrator" || 
                 role.ToLower() == "admin")
             {
-                // The admin password in your database is hashed with SHA2_512 without a salt
+                // The account password in the database is hashed with SHA2_512 without a salt
                 byte[] storedHash = (byte[])userRow["PasswordHash"];
                 byte[] computedHash = null;
                 
@@ -70,8 +72,7 @@ namespace StudentManagementV1._5.Services
             {
                 // Regular accounts use HMACSHA512 with salt
                 byte[] storedHash = (byte[])userRow["PasswordHash"];
-                byte[] storedSalt = (byte[])userRow["PasswordSalt"];
-
+                
                 using var hmac = new HMACSHA512(storedSalt);
                 byte[] computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
 
