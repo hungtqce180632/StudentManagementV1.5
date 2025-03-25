@@ -1,6 +1,7 @@
 using StudentManagementV1._5.Commands;
 using StudentManagementV1._5.Models;
 using StudentManagementV1._5.Services;
+using StudentManagementV1._5.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -108,11 +109,11 @@ namespace StudentManagementV1._5.ViewModels
             DeleteExamCommand = new RelayCommand(async param => await DeleteExamAsync(param as Exam), param => param != null);
             ViewScoresCommand = new RelayCommand(param => ViewScores(param as Exam), param => param != null);
             BackCommand = new RelayCommand(_ => _navigationService.NavigateTo(AppViews.AdminDashboard));
-            
+
             // Load initial data - don't use Task.Run which creates a background thread
             InitializeDataAsync();
         }
-        
+
         // New method to initialize data properly
         private async void InitializeDataAsync()
         {
@@ -128,24 +129,25 @@ namespace StudentManagementV1._5.ViewModels
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
         private async Task RefreshExamsAsync()
         {
             await LoadExamsAsync();
         }
-        
+
         private async Task LoadClassesAsync()
         {
             try
             {
                 IsLoading = true;
-                
+
                 // Load classes from database
                 string query = "SELECT ClassID, ClassName FROM Classes WHERE IsActive = 1 ORDER BY ClassName";
                 var result = await _databaseService.ExecuteQueryAsync(query);
 
                 // Update UI on the dispatcher thread
-                Application.Current.Dispatcher.Invoke(() => {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
                     Classes.Clear();
                     // Add "All Classes" option
                     Classes.Add(new Class { ClassID = 0, ClassName = "All Classes" });
@@ -172,19 +174,20 @@ namespace StudentManagementV1._5.ViewModels
                 IsLoading = false;
             }
         }
-        
+
         private async Task LoadSubjectsAsync()
         {
             try
             {
                 IsLoading = true;
-                
+
                 // Load subjects from database
                 string query = "SELECT SubjectID, SubjectName FROM Subjects WHERE IsActive = 1 ORDER BY SubjectName";
                 var result = await _databaseService.ExecuteQueryAsync(query);
 
                 // Update UI on the dispatcher thread
-                Application.Current.Dispatcher.Invoke(() => {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
                     Subjects.Clear();
                     // Add "All Subjects" option
                     Subjects.Add(new Subject { SubjectID = 0, SubjectName = "All Subjects" });
@@ -211,19 +214,20 @@ namespace StudentManagementV1._5.ViewModels
                 IsLoading = false;
             }
         }
-        
+
         private async Task LoadExamsAsync()
         {
             try
             {
                 IsLoading = true;
-                
+
                 string query = BuildExamQuery();
                 var parameters = BuildQueryParameters();
                 DataTable result = await _databaseService.ExecuteQueryAsync(query, parameters);
-                
+
                 // Update UI on the dispatcher thread
-                Application.Current.Dispatcher.Invoke(() => {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
                     Exams.Clear();
                     PopulateExamsFromDataTable(result);
                 });
@@ -238,7 +242,7 @@ namespace StudentManagementV1._5.ViewModels
                 IsLoading = false;
             }
         }
-        
+
         private string BuildExamQuery()
         {
             string query = @"
@@ -257,7 +261,7 @@ namespace StudentManagementV1._5.ViewModels
                 JOIN Subjects s ON e.SubjectID = s.SubjectID
                 JOIN Classes c ON e.ClassID = c.ClassID
                 WHERE 1=1";
-            
+
             if (_selectedClass?.ClassID > 0)
             {
                 query += " AND e.ClassID = @ClassID";
@@ -274,32 +278,32 @@ namespace StudentManagementV1._5.ViewModels
             }
 
             query += " ORDER BY e.ExamDate DESC";
-            
+
             return query;
         }
-        
+
         private Dictionary<string, object> BuildQueryParameters()
         {
             var parameters = new Dictionary<string, object>();
-            
+
             if (_selectedClass?.ClassID > 0)
             {
                 parameters["@ClassID"] = _selectedClass.ClassID;
             }
-            
+
             if (_selectedSubject?.SubjectID > 0)
             {
                 parameters["@SubjectID"] = _selectedSubject.SubjectID;
             }
-            
+
             if (!string.IsNullOrWhiteSpace(_searchText))
             {
                 parameters["@Search"] = $"%{_searchText}%";
             }
-            
+
             return parameters;
         }
-        
+
         private void PopulateExamsFromDataTable(DataTable dataTable)
         {
             foreach (DataRow row in dataTable.Rows)
@@ -319,79 +323,93 @@ namespace StudentManagementV1._5.ViewModels
                 });
             }
         }
-        
+
         private void AddExam()
         {
-            // For now just show a placeholder message
-            // In a future update, implement an Add Exam dialog
-            MessageBox.Show("Add Exam functionality will be implemented in a future update.", 
-                "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Create and show the dialog
+            var dialogWindow = new ExamDialogView();
+            var viewModel = new ExamDialogViewModel(_databaseService, dialogWindow);
+            dialogWindow.DataContext = viewModel;
+            dialogWindow.Owner = Application.Current.MainWindow;
+
+            // If dialog was confirmed, refresh the exams list
+            if (dialogWindow.ShowDialog() == true)
+            {
+                _ = RefreshExamsAsync();
+            }
         }
-        
+
         private void EditExam(Exam? exam)
         {
             if (exam == null) return;
-            
-            // For now just show a placeholder message
-            // In a future update, implement an Edit Exam dialog
-            MessageBox.Show($"Edit Exam '{exam.ExamName}' functionality will be implemented in a future update.", 
-                "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // Create and show the dialog with the exam data
+            var dialogWindow = new ExamDialogView();
+            var viewModel = new ExamDialogViewModel(_databaseService, dialogWindow, exam);
+            dialogWindow.DataContext = viewModel;
+            dialogWindow.Owner = Application.Current.MainWindow;
+
+            // If dialog was confirmed, refresh the exams list
+            if (dialogWindow.ShowDialog() == true)
+            {
+                _ = RefreshExamsAsync();
+            }
         }
-        
+
         private async Task DeleteExamAsync(Exam? exam)
         {
             if (exam == null) return;
-            
+
             // Confirm deletion
-            var result = MessageBox.Show($"Are you sure you want to delete exam '{exam.ExamName}'?\n\nThis will also delete all associated scores.", 
+            var result = MessageBox.Show($"Are you sure you want to delete exam '{exam.ExamName}'?\n\nThis will also delete all associated scores.",
                 "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            
+
             if (result == MessageBoxResult.Yes)
             {
                 await DeleteExamFromDatabaseAsync(exam);
             }
         }
-        
+
         private async Task DeleteExamFromDatabaseAsync(Exam exam)
         {
             try
             {
                 IsLoading = true;
-                
+
                 // Check if exam has scores
                 string checkQuery = "SELECT COUNT(*) FROM Scores WHERE ExamID = @ExamID";
                 var checkParams = new Dictionary<string, object> { { "@ExamID", exam.ExamID } };
                 var scoreCount = await _databaseService.ExecuteScalarAsync(checkQuery, checkParams);
-                
+
                 if (scoreCount != null && Convert.ToInt32(scoreCount) > 0)
                 {
                     var confirmDelete = MessageBox.Show(
                         $"This exam has {scoreCount} score records associated with it. Deleting the exam will also delete all scores. Continue?",
                         "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                    
+
                     if (confirmDelete != MessageBoxResult.Yes)
                     {
                         return;
                     }
-                    
+
                     // Delete associated scores first
                     string deleteScoresQuery = "DELETE FROM Scores WHERE ExamID = @ExamID";
                     await _databaseService.ExecuteNonQueryAsync(deleteScoresQuery, checkParams);
                 }
-                
+
                 // Delete the exam
                 string query = "DELETE FROM Exams WHERE ExamID = @ExamID";
                 var parameters = new Dictionary<string, object>
                 {
                     { "@ExamID", exam.ExamID }
                 };
-                
+
                 await _databaseService.ExecuteNonQueryAsync(query, parameters);
-                
+
                 // Refresh the list
                 await LoadExamsAsync();
 
-                MessageBox.Show($"Exam '{exam.ExamName}' has been deleted.", 
+                MessageBox.Show($"Exam '{exam.ExamName}' has been deleted.",
                     "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
@@ -404,15 +422,15 @@ namespace StudentManagementV1._5.ViewModels
                 IsLoading = false;
             }
         }
-        
+
         private void ViewScores(Exam? exam)
         {
             if (exam == null) return;
-            
+
             // Navigate to the score management view with the selected exam
-            MessageBox.Show($"View scores for '{exam.ExamName}' functionality will be implemented in a future update.", 
+            MessageBox.Show($"View scores for '{exam.ExamName}' functionality will be implemented in a future update.",
                 "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
-                
+
             // In future implementation:
             // _navigationService.NavigateTo(AppViews.ScoreManagement, exam);
         }
