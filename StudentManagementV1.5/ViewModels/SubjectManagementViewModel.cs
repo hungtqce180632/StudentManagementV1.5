@@ -12,23 +12,59 @@ using System.Windows.Input;
 
 namespace StudentManagementV1._5.ViewModels
 {
+    // Lớp SubjectManagementViewModel
+    // + Tại sao cần sử dụng: Quản lý và hiển thị danh sách môn học trong hệ thống
+    // + Lớp này được gọi từ màn hình quản lý môn học (SubjectManagementView)
+    // + Chức năng chính: Tìm kiếm, lọc, thêm, sửa và xóa môn học
     public class SubjectManagementViewModel : ViewModelBase
     {
+        // 1. Dịch vụ cơ sở dữ liệu để truy vấn và cập nhật thông tin môn học
+        // 2. Được truyền vào từ constructor
+        // 3. Dùng để tải và thao tác với dữ liệu môn học
         private readonly DatabaseService _databaseService;
+        
+        // 1. Dịch vụ điều hướng
+        // 2. Được truyền vào từ constructor
+        // 3. Dùng để chuyển đổi giữa các màn hình
         private readonly NavigationService _navigationService;
 
+        // 1. Danh sách môn học hiển thị trong UI
+        // 2. Binding đến DataGrid hoặc ListView
+        // 3. Được tải từ cơ sở dữ liệu và lọc theo các điều kiện
         private ObservableCollection<Subject> _subjects = [];
+        
+        // 1. Từ khóa tìm kiếm
+        // 2. Binding đến TextBox tìm kiếm
+        // 3. Dùng để lọc môn học theo tên hoặc mô tả
         private string _searchText = string.Empty;
+        
+        // 1. Tùy chọn hiển thị môn học không hoạt động
+        // 2. Binding đến CheckBox trong UI
+        // 3. Khi thay đổi sẽ lọc danh sách môn học
         private bool _showInactiveSubjects = false;
+        
+        // 1. Trạng thái đang tải dữ liệu
+        // 2. Binding đến indicator trong UI
+        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
         private bool _isLoading;
+        
+        // 1. Môn học được chọn trong danh sách
+        // 2. Binding đến SelectedItem của DataGrid/ListView
+        // 3. Dùng cho các thao tác sửa, xóa hoặc hiển thị chi tiết
         private Subject? _selectedSubject;
 
+        // 1. Danh sách môn học hiển thị trong UI
+        // 2. Binding đến DataGrid hoặc ListView
+        // 3. Được tải từ cơ sở dữ liệu và lọc theo các điều kiện
         public ObservableCollection<Subject> Subjects
         {
             get => _subjects;
             set => SetProperty(ref _subjects, value);
         }
 
+        // 1. Từ khóa tìm kiếm
+        // 2. Binding đến TextBox tìm kiếm
+        // 3. Khi thay đổi sẽ gọi RefreshSubjectsAsync để cập nhật danh sách
         public string SearchText
         {
             get => _searchText;
@@ -41,6 +77,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Tùy chọn hiển thị môn học không hoạt động
+        // 2. Binding đến CheckBox trong UI
+        // 3. Khi thay đổi sẽ gọi RefreshSubjectsAsync để cập nhật danh sách
         public bool ShowInactiveSubjects
         {
             get => _showInactiveSubjects;
@@ -53,23 +92,47 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Trạng thái đang tải dữ liệu
+        // 2. Binding đến indicator trong UI
+        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
         public bool IsLoading
         {
             get => _isLoading;
             set => SetProperty(ref _isLoading, value);
         }
 
+        // 1. Môn học được chọn trong danh sách
+        // 2. Binding đến SelectedItem của DataGrid/ListView
+        // 3. Dùng cho các thao tác sửa, xóa hoặc hiển thị chi tiết
         public Subject? SelectedSubject
         {
             get => _selectedSubject;
             set => SetProperty(ref _selectedSubject, value);
         }
 
+        // 1. Lệnh thêm môn học mới
+        // 2. Binding đến nút "Thêm môn học" trong UI
+        // 3. Khi được gọi, mở hộp thoại thêm môn học
         public ICommand AddSubjectCommand { get; }
+        
+        // 1. Lệnh sửa môn học
+        // 2. Binding đến nút "Sửa" trong UI
+        // 3. Khi được gọi, mở hộp thoại sửa môn học với thông tin đã chọn
         public ICommand EditSubjectCommand { get; }
+        
+        // 1. Lệnh xóa môn học
+        // 2. Binding đến nút "Xóa" trong UI
+        // 3. Khi được gọi, hiển thị xác nhận và xóa môn học đã chọn
         public ICommand DeleteSubjectCommand { get; }
+        
+        // 1. Lệnh quay lại
+        // 2. Binding đến nút "Quay lại" trong UI
+        // 3. Khi được gọi, chuyển về màn hình dashboard
         public ICommand BackCommand { get; }
 
+        // 1. Constructor của lớp
+        // 2. Khởi tạo các tham số và thiết lập lệnh
+        // 3. Tải dữ liệu ban đầu từ cơ sở dữ liệu
         public SubjectManagementViewModel(DatabaseService databaseService, NavigationService navigationService)
         {
             _databaseService = databaseService;
@@ -84,11 +147,17 @@ namespace StudentManagementV1._5.ViewModels
             _ = LoadSubjectsAsync();
         }
         
+        // 1. Phương thức làm mới danh sách môn học
+        // 2. Gọi khi có thay đổi tìm kiếm hoặc bộ lọc
+        // 3. Tải lại dữ liệu từ cơ sở dữ liệu
         private async Task RefreshSubjectsAsync()
         {
             await LoadSubjectsAsync();
         }
         
+        // 1. Phương thức tải danh sách môn học
+        // 2. Truy vấn cơ sở dữ liệu với các điều kiện lọc
+        // 3. Cập nhật danh sách Subjects với kết quả tìm kiếm
         private async Task LoadSubjectsAsync()
         {
             try
@@ -113,6 +182,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
         
+        // 1. Phương thức xây dựng câu truy vấn SQL
+        // 2. Tạo câu truy vấn dựa trên điều kiện tìm kiếm và bộ lọc
+        // 3. Trả về chuỗi truy vấn SQL hoàn chỉnh
         private string BuildSubjectQuery()
         {
             string query = @"
@@ -142,6 +214,9 @@ namespace StudentManagementV1._5.ViewModels
             return query;
         }
         
+        // 1. Phương thức tạo tham số cho truy vấn
+        // 2. Tạo dictionary chứa các tham số truy vấn
+        // 3. Trả về dictionary với tham số tìm kiếm (nếu có)
         private Dictionary<string, object> BuildQueryParameters()
         {
             var parameters = new Dictionary<string, object>();
@@ -154,6 +229,9 @@ namespace StudentManagementV1._5.ViewModels
             return parameters;
         }
         
+        // 1. Phương thức điền dữ liệu từ DataTable vào danh sách Subjects
+        // 2. Chuyển đổi từng dòng dữ liệu thành đối tượng Subject
+        // 3. Thêm đối tượng Subject vào danh sách Subjects
         private void PopulateSubjectsFromDataTable(DataTable dataTable)
         {
             foreach (DataRow row in dataTable.Rows)
@@ -171,6 +249,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
         
+        // 1. Phương thức thêm môn học mới
+        // 2. Hiển thị thông báo chức năng sẽ được triển khai trong tương lai
+        // 3. Sẽ mở hộp thoại thực sự trong triển khai tương lai
         private void AddSubject()
         {
             // For now just show a placeholder message
@@ -179,6 +260,9 @@ namespace StudentManagementV1._5.ViewModels
                 "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         
+        // 1. Phương thức sửa môn học
+        // 2. Hiển thị thông báo chức năng sẽ được triển khai trong tương lai
+        // 3. Sẽ mở hộp thoại sửa với thông tin môn học đã chọn trong triển khai tương lai
         private void EditSubject(Subject? subject)
         {
             if (subject == null) return;
@@ -189,6 +273,9 @@ namespace StudentManagementV1._5.ViewModels
                 "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         
+        // 1. Phương thức xóa môn học
+        // 2. Hiển thị hộp thoại xác nhận trước khi xóa
+        // 3. Nếu xác nhận, gọi phương thức hủy kích hoạt môn học
         private async Task DeleteSubjectAsync(Subject? subject)
         {
             if (subject == null) return;
@@ -203,6 +290,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
         
+        // 1. Phương thức hủy kích hoạt môn học
+        // 2. Kiểm tra xem môn học có đang được sử dụng không và cập nhật trạng thái
+        // 3. Nếu thành công, làm mới danh sách môn học
         private async Task DeactivateSubjectAsync(Subject subject)
         {
             try

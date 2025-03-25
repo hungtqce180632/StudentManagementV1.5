@@ -1,4 +1,20 @@
-<!-- filepath: c:\Users\truon\Desktop\StudentManagementV1.5\StudentManagementV1.5\Views\AddEditClassView.xaml -->
+<!-- 
+    View AddEditClassView
+    
+    Tại sao sử dụng:
+    - Hiển thị form để thêm mới hoặc chỉnh sửa lớp học
+    - Cho phép người dùng nhập thông tin lớp học và chọn giáo viên chủ nhiệm
+    
+    Quan hệ với các lớp khác:
+    - Data Context: AddEditClassViewModel
+    - Sử dụng các Converter để chuyển đổi dữ liệu
+    
+    Chức năng chính:
+    - Nhập tên lớp, cấp lớp, năm học
+    - Chọn giáo viên chủ nhiệm từ danh sách
+    - Thiết lập sức chứa và trạng thái hoạt động
+    - Lưu hoặc hủy thay đổi
+ -->
 <Window x:Class="StudentManagementV1._5.Views.AddEditClassView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

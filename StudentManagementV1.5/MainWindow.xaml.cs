@@ -18,20 +18,61 @@ using StudentManagementV1._5.Views;
 
 namespace StudentManagementV1._5;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
+/*
+ * Lớp MainWindow
+ * 
+ * Tại sao sử dụng:
+ * - Là cửa sổ chính của ứng dụng, chịu trách nhiệm quản lý chế độ xem của toàn bộ ứng dụng
+ * - Triển khai INotifyPropertyChanged để hỗ trợ binding giữa UI và logic
+ * 
+ * Quan hệ với các lớp khác:
+ * - Khởi tạo và quản lý các dịch vụ chính: DatabaseService, AuthenticationService, EmailService, NavigationService
+ * - Điều hướng giữa các màn hình khác nhau dựa trên trạng thái đăng nhập và vai trò người dùng
+ * 
+ * Chức năng chính:
+ * - Điều khiển luồng chuyển đổi giữa màn hình đăng nhập và các màn hình chính của ứng dụng
+ * - Khởi tạo các dịch vụ cần thiết và phân giải các view khi điều hướng
+ */
 public partial class MainWindow : Window, INotifyPropertyChanged
 {
+    // 1. Dịch vụ kết nối với cơ sở dữ liệu
+    // 2. Được sử dụng bởi các dịch vụ khác để truy xuất và cập nhật dữ liệu
+    // 3. Được khởi tạo trong constructor
     private readonly DatabaseService _databaseService;
+    
+    // 1. Dịch vụ xác thực người dùng
+    // 2. Sử dụng để quản lý đăng nhập, đăng xuất và thông tin người dùng hiện tại
+    // 3. Được khởi tạo trong constructor và truyền vào DatabaseService
     private readonly AuthenticationService _authService;
+    
+    // 1. Dịch vụ gửi email
+    // 2. Sử dụng để gửi thông báo và email đặt lại mật khẩu
+    // 3. Được khởi tạo trong constructor
     private readonly EmailService _emailService;
+    
+    // 1. Dịch vụ điều hướng
+    // 2. Sử dụng để chuyển đổi giữa các màn hình khác nhau
+    // 3. Được khởi tạo trong constructor với MainFrame và hàm ResolveView
     private readonly Services.NavigationService _navigationService;
+    
+    // 1. Trạng thái hiển thị của màn hình đăng nhập
+    // 2. Binding đến Visibility của MainContent và MainFrame
+    // 3. True khi hiển thị màn hình đăng nhập, False khi hiển thị nội dung chính
     private bool _isLoginVisible = true;
+    
+    // 1. ViewModel của màn hình đăng nhập
+    // 2. Chứa logic xử lý đăng nhập và điều hướng
+    // 3. Được khởi tạo trong constructor và sử dụng trong ShowLoginView
     private LoginViewModel _loginViewModel;
 
+    // 1. Sự kiện thông báo khi thuộc tính thay đổi
+    // 2. Đăng ký với binding trong XAML
+    // 3. Cần thiết để hiển thị cập nhật trạng thái giao diện
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    // 1. Thuộc tính binding đến Visibility trong XAML
+    // 2. Điều khiển hiển thị của màn hình đăng nhập và nội dung chính
+    // 3. Thông báo thay đổi thông qua OnPropertyChanged
     public bool IsLoginVisible
     {
         get => _isLoginVisible;
@@ -42,6 +83,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
+    // 1. Constructor chính của MainWindow
+    // 2. Khởi tạo các dịch vụ, thiết lập điều hướng và hiển thị màn hình đăng nhập
+    // 3. Đặt DataContext là chính MainWindow để hỗ trợ binding
     public MainWindow()
     {
         // Set DataContext to this instance for bindings
@@ -63,6 +107,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         ShowLoginView();
     }
 
+    // 1. Phương thức hiển thị màn hình đăng nhập
+    // 2. Tạo LoginView với LoginViewModel làm DataContext
+    // 3. Gán LoginView làm nội dung của MainContent
     private void ShowLoginView()
     {
         // Create the login view and set its DataContext
@@ -73,6 +120,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         MainContent.Content = loginView;
     }
 
+    // 1. Xử lý sự kiện đăng nhập thành công
+    // 2. Ẩn màn hình đăng nhập và hiển thị nội dung chính
+    // 3. Điều hướng đến dashboard tương ứng với vai trò người dùng
     private void OnLoginSuccessful(object sender, EventArgs e)
     {
         // Hide login view and show main content
@@ -96,6 +146,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
+    // 1. Phương thức phân giải các view từ enum AppViews
+    // 2. Tạo instance của view tương ứng với DataContext phù hợp
+    // 3. Được gọi bởi NavigationService khi cần chuyển đổi view
     private UserControl ResolveView(AppViews view)
     {
         return view switch
@@ -122,6 +175,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         };
     }
 
+    // 1. Phương thức thông báo khi thuộc tính thay đổi
+    // 2. Kích hoạt sự kiện PropertyChanged với tên thuộc tính
+    // 3. Sử dụng CallerMemberName để tự động lấy tên thuộc tính
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

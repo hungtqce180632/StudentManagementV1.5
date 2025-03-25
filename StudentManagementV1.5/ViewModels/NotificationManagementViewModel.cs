@@ -11,29 +11,77 @@ using System.Windows.Input;
 
 namespace StudentManagementV1._5.ViewModels
 {
+    // Lớp NotificationManagementViewModel
+    // + Tại sao cần sử dụng: Quản lý danh sách, tìm kiếm, lọc, xem chi tiết và xóa thông báo
+    // + Lớp này được gọi từ màn hình quản lý thông báo
+    // + Chức năng chính: Hiển thị và tương tác với danh sách thông báo trong hệ thống
     public class NotificationManagementViewModel : ViewModelBase
     {
+        // 1. Dịch vụ cơ sở dữ liệu để truy vấn và cập nhật thông báo
+        // 2. Được truyền vào từ constructor
+        // 3. Dùng để tải và thao tác với dữ liệu thông báo
         private readonly DatabaseService _databaseService;
+        
+        // 1. Dịch vụ điều hướng
+        // 2. Được truyền vào từ constructor
+        // 3. Sử dụng để điều hướng giữa các màn hình
         private readonly NavigationService _navigationService;
+        
+        // 1. Dịch vụ xác thực
+        // 2. Được truyền vào từ constructor
+        // 3. Cung cấp thông tin về người dùng hiện tại
         private readonly AuthenticationService _authService;
 
+        // 1. Danh sách thông báo hiển thị trong UI
+        // 2. Binding đến ListView hoặc DataGrid
+        // 3. Được tải từ cơ sở dữ liệu và lọc theo các điều kiện
         private ObservableCollection<Notification> _notifications = [];
+        
+        // 1. Từ khóa tìm kiếm
+        // 2. Binding đến TextBox tìm kiếm
+        // 3. Dùng để lọc thông báo theo tiêu đề hoặc nội dung
         private string _searchText = string.Empty;
+        
+        // 1. Tùy chọn hiển thị thông báo đã hết hạn
+        // 2. Binding đến CheckBox trong UI
+        // 3. Dùng để lọc thông báo theo trạng thái hết hạn
         private bool _showExpired = false;
+        
+        // 1. Trạng thái đang tải dữ liệu
+        // 2. Binding đến indicator trong UI
+        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
         private bool _isLoading;
+        
+        // 1. Thông báo được chọn trong danh sách
+        // 2. Binding đến SelectedItem của ListView/DataGrid
+        // 3. Dùng cho các thao tác xem chi tiết, sửa, xóa
         private Notification? _selectedNotification;
+        
+        // 1. Loại người nhận được chọn để lọc
+        // 2. Binding đến ComboBox lọc theo loại người nhận
+        // 3. Dùng để lọc thông báo theo loại người nhận
         private string _selectedRecipientTypeFilter = "All";
+        
+        // 1. Danh sách loại người nhận để lọc
+        // 2. Binding đến ItemsSource của ComboBox lọc
+        // 3. Cung cấp các tùy chọn lọc theo loại người nhận
         private ObservableCollection<string> _recipientTypeFilters = new ObservableCollection<string>
         {
             "All", "All Users", "Class", "Teacher", "Student"
         };
 
+        // 1. Danh sách thông báo hiển thị trong UI
+        // 2. Binding đến ListView hoặc DataGrid
+        // 3. Được tải từ cơ sở dữ liệu và lọc theo các điều kiện
         public ObservableCollection<Notification> Notifications
         {
             get => _notifications;
             set => SetProperty(ref _notifications, value);
         }
 
+        // 1. Từ khóa tìm kiếm
+        // 2. Binding đến TextBox tìm kiếm
+        // 3. Dùng để lọc thông báo theo tiêu đề hoặc nội dung
         public string SearchText
         {
             get => _searchText;
@@ -46,6 +94,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Loại người nhận được chọn để lọc
+        // 2. Binding đến ComboBox lọc theo loại người nhận
+        // 3. Dùng để lọc thông báo theo loại người nhận
         public string SelectedRecipientTypeFilter
         {
             get => _selectedRecipientTypeFilter;
@@ -58,12 +109,18 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Danh sách loại người nhận để lọc
+        // 2. Binding đến ItemsSource của ComboBox lọc
+        // 3. Cung cấp các tùy chọn lọc theo loại người nhận
         public ObservableCollection<string> RecipientTypeFilters
         {
             get => _recipientTypeFilters;
             set => SetProperty(ref _recipientTypeFilters, value);
         }
 
+        // 1. Tùy chọn hiển thị thông báo đã hết hạn
+        // 2. Binding đến CheckBox trong UI
+        // 3. Dùng để lọc thông báo theo trạng thái hết hạn
         public bool ShowExpired
         {
             get => _showExpired;
@@ -76,24 +133,52 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Trạng thái đang tải dữ liệu
+        // 2. Binding đến indicator trong UI
+        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
         public bool IsLoading
         {
             get => _isLoading;
             set => SetProperty(ref _isLoading, value);
         }
 
+        // 1. Thông báo được chọn trong danh sách
+        // 2. Binding đến SelectedItem của ListView/DataGrid
+        // 3. Dùng cho các thao tác xem chi tiết, sửa, xóa
         public Notification? SelectedNotification
         {
             get => _selectedNotification;
             set => SetProperty(ref _selectedNotification, value);
         }
 
+        // 1. Lệnh tạo thông báo mới
+        // 2. Binding đến nút tạo thông báo trong UI
+        // 3. Mở hộp thoại tạo thông báo mới
         public ICommand CreateNotificationCommand { get; }
+        
+        // 1. Lệnh xem chi tiết thông báo
+        // 2. Binding đến nút xem hoặc sự kiện double-click
+        // 3. Hiển thị chi tiết thông báo và đánh dấu đã đọc
         public ICommand ViewNotificationCommand { get; }
+        
+        // 1. Lệnh sửa thông báo
+        // 2. Binding đến nút sửa trong UI
+        // 3. Mở hộp thoại sửa thông báo
         public ICommand EditNotificationCommand { get; }
+        
+        // 1. Lệnh xóa thông báo
+        // 2. Binding đến nút xóa trong UI
+        // 3. Xóa thông báo đã chọn sau khi xác nhận
         public ICommand DeleteNotificationCommand { get; }
+        
+        // 1. Lệnh quay lại màn hình trước
+        // 2. Binding đến nút quay lại trong UI
+        // 3. Điều hướng về màn hình dashboard
         public ICommand BackCommand { get; }
 
+        // 1. Constructor của lớp
+        // 2. Khởi tạo các dịch vụ và lệnh
+        // 3. Tải dữ liệu ban đầu
         public NotificationManagementViewModel(DatabaseService databaseService, AuthenticationService authService, NavigationService navigationService)
         {
             _databaseService = databaseService;
@@ -110,11 +195,17 @@ namespace StudentManagementV1._5.ViewModels
             _ = LoadNotificationsAsync();
         }
         
+        // 1. Phương thức làm mới danh sách thông báo
+        // 2. Gọi khi có thay đổi ở các bộ lọc
+        // 3. Tải lại dữ liệu từ cơ sở dữ liệu
         private async Task RefreshNotificationsAsync()
         {
             await LoadNotificationsAsync();
         }
         
+        // 1. Phương thức tải danh sách thông báo
+        // 2. Truy vấn cơ sở dữ liệu với các điều kiện lọc
+        // 3. Điền dữ liệu vào danh sách Notifications
         private async Task LoadNotificationsAsync()
         {
             try
@@ -139,6 +230,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
         
+        // 1. Phương thức xây dựng câu truy vấn SQL
+        // 2. Tạo câu truy vấn dựa trên các điều kiện lọc
+        // 3. Trả về chuỗi SQL hoàn chỉnh
         private string BuildNotificationQuery()
         {
             string query = @"
@@ -190,6 +284,9 @@ namespace StudentManagementV1._5.ViewModels
             return query;
         }
         
+        // 1. Phương thức xây dựng tham số cho truy vấn
+        // 2. Tạo dictionary các tham số dựa trên điều kiện lọc
+        // 3. Trả về dictionary chứa tham số và giá trị
         private Dictionary<string, object> BuildQueryParameters()
         {
             var parameters = new Dictionary<string, object>();
@@ -207,6 +304,9 @@ namespace StudentManagementV1._5.ViewModels
             return parameters;
         }
         
+        // 1. Phương thức điền dữ liệu từ DataTable vào danh sách thông báo
+        // 2. Chuyển đổi từng dòng dữ liệu thành đối tượng Notification
+        // 3. Thêm các đối tượng vào danh sách Notifications
         private void PopulateNotificationsFromDataTable(DataTable dataTable)
         {
             foreach (DataRow row in dataTable.Rows)
@@ -228,6 +328,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
         
+        // 1. Phương thức tạo thông báo mới
+        // 2. Mở hộp thoại tạo thông báo
+        // 3. Hiện tại chỉ hiển thị thông báo giữ chỗ
         private void CreateNotification()
         {
             // For now just show a placeholder message
@@ -236,6 +339,9 @@ namespace StudentManagementV1._5.ViewModels
                 "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         
+        // 1. Phương thức xem chi tiết thông báo
+        // 2. Hiển thị hộp thoại với thông tin chi tiết
+        // 3. Đánh dấu thông báo là đã đọc nếu chưa
         private void ViewNotification(Notification? notification)
         {
             if (notification == null) return;
@@ -260,6 +366,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
         
+        // 1. Phương thức đánh dấu thông báo là đã đọc
+        // 2. Cập nhật trạng thái trong cơ sở dữ liệu
+        // 3. Cập nhật thuộc tính IsRead của đối tượng
         private async Task MarkAsReadAsync(Notification notification)
         {
             try
@@ -282,6 +391,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
         
+        // 1. Phương thức chỉnh sửa thông báo
+        // 2. Mở hộp thoại chỉnh sửa thông báo
+        // 3. Hiện tại chỉ hiển thị thông báo giữ chỗ
         private void EditNotification(Notification? notification)
         {
             if (notification == null) return;
@@ -292,6 +404,9 @@ namespace StudentManagementV1._5.ViewModels
                 "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         
+        // 1. Phương thức xóa thông báo
+        // 2. Hiển thị hộp thoại xác nhận xóa
+        // 3. Nếu xác nhận, gọi phương thức xóa từ cơ sở dữ liệu
         private async Task DeleteNotificationAsync(Notification? notification)
         {
             if (notification == null) return;
@@ -306,6 +421,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
         
+        // 1. Phương thức xóa thông báo từ cơ sở dữ liệu
+        // 2. Thực hiện truy vấn DELETE
+        // 3. Làm mới danh sách và hiển thị thông báo kết quả
         private async Task DeleteNotificationFromDatabaseAsync(Notification notification)
         {
             try

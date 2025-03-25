@@ -1,3 +1,19 @@
+<!-- 
+    View LoginView
+    
+    Tại sao sử dụng:
+    - Cung cấp giao diện đăng nhập cho người dùng
+    - Là màn hình đầu tiên hiển thị khi khởi động ứng dụng
+    
+    Quan hệ với các lớp khác:
+    - Data Context: LoginViewModel
+    - Sử dụng code-behind để xử lý binding mật khẩu đặc biệt
+    
+    Chức năng chính:
+    - Thu thập thông tin đăng nhập (tên người dùng và mật khẩu)
+    - Hiển thị thông báo lỗi nếu đăng nhập không thành công
+    - Cung cấp liên kết đến chức năng đặt lại mật khẩu
+ -->
 <UserControl x:Class="StudentManagementV1._5.Views.LoginView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

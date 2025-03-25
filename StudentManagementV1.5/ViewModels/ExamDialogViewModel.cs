@@ -12,93 +12,199 @@ using System.Windows.Input;
 
 namespace StudentManagementV1._5.ViewModels
 {
+    // Lớp ExamDialogViewModel
+    // + Tại sao cần sử dụng: Quản lý giao diện và dữ liệu cho hộp thoại thêm/sửa kỳ thi
+    // + Lớp này được gọi từ ExamManagementViewModel khi cần tạo hoặc chỉnh sửa kỳ thi
+    // + Chức năng chính: Cung cấp các thuộc tính và lệnh để tạo mới hoặc cập nhật thông tin kỳ thi
     public class ExamDialogViewModel : ViewModelBase
     {
+        // 1. Dịch vụ kết nối với cơ sở dữ liệu
+        // 2. Dùng để truy vấn và cập nhật dữ liệu
+        // 3. Được truyền vào từ constructor
         private readonly DatabaseService _databaseService;
+        
+        // 1. Cửa sổ hộp thoại hiện tại
+        // 2. Dùng để điều khiển trạng thái của hộp thoại
+        // 3. Được truyền vào từ constructor
         private readonly Window _dialogWindow;
+        
+        // 1. Lưu thông tin kỳ thi gốc nếu đang ở chế độ sửa
+        // 2. Dùng để tham chiếu khi cập nhật
+        // 3. Có thể null nếu đang ở chế độ thêm mới
         private readonly Exam? _originalExam;
+        
+        // 1. Xác định chế độ làm việc: chỉnh sửa hoặc thêm mới
+        // 2. Dựa trên việc có truyền Exam vào constructor hay không
+        // 3. True = chỉnh sửa, False = thêm mới
         private readonly bool _isEditMode;
+        
+        // 1. Trạng thái đang tải dữ liệu
+        // 2. Dùng để hiển thị thông báo "Đang tải..."
+        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
         private bool _isLoading;
+        
+        // 1. Tiêu đề của hộp thoại
+        // 2. Hiển thị ở phần đầu của hộp thoại
+        // 3. Được đặt dựa trên chế độ làm việc
         private string _dialogTitle;
+        
+        // 1. Tên của kỳ thi
+        // 2. Hiển thị và chỉnh sửa trong form
+        // 3. Bắt buộc phải điền
         private string _examName = string.Empty;
+        
+        // 1. Ngày diễn ra kỳ thi
+        // 2. Hiển thị và chỉnh sửa trong form
+        // 3. Mặc định là ngày hiện tại
         private DateTime _examDate = DateTime.Now;
+        
+        // 1. Thời gian làm bài thi (phút)
+        // 2. Hiển thị và chỉnh sửa trong form
+        // 3. Có thể null nếu không giới hạn thời gian
         private int? _duration;
+        
+        // 1. Tổng điểm của bài thi
+        // 2. Hiển thị và chỉnh sửa trong form
+        // 3. Mặc định là 100 điểm
         private int _totalMarks = 100;
+        
+        // 1. Mô tả về kỳ thi
+        // 2. Hiển thị và chỉnh sửa trong form
+        // 3. Có thể để trống
         private string _description = string.Empty;
+        
+        // 1. Danh sách môn học cho kỳ thi
+        // 2. Hiển thị trong dropdown để chọn
+        // 3. Được tải từ cơ sở dữ liệu
         private ObservableCollection<Subject> _subjects = new ObservableCollection<Subject>();
+        
+        // 1. Danh sách lớp học cho kỳ thi
+        // 2. Hiển thị trong dropdown để chọn
+        // 3. Được tải từ cơ sở dữ liệu
         private ObservableCollection<Class> _classes = new ObservableCollection<Class>();
+        
+        // 1. Môn học được chọn cho kỳ thi
+        // 2. Được chọn từ dropdown môn học
+        // 3. Bắt buộc phải chọn
         private Subject? _selectedSubject;
+        
+        // 1. Lớp học được chọn cho kỳ thi
+        // 2. Được chọn từ dropdown lớp học
+        // 3. Bắt buộc phải chọn
         private Class? _selectedClass;
 
+        // 1. Trạng thái đang tải dữ liệu
+        // 2. Binding đến UI để hiển thị thông báo "Đang tải..."
+        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
         public bool IsLoading
         {
             get => _isLoading;
             set => SetProperty(ref _isLoading, value);
         }
 
+        // 1. Tiêu đề của hộp thoại
+        // 2. Binding đến UI để hiển thị
+        // 3. Được đặt dựa trên chế độ làm việc
         public string DialogTitle
         {
             get => _dialogTitle;
             set => SetProperty(ref _dialogTitle, value);
         }
 
+        // 1. Tên của kỳ thi
+        // 2. Binding đến UI để hiển thị và chỉnh sửa
+        // 3. Bắt buộc phải điền
         public string ExamName
         {
             get => _examName;
             set => SetProperty(ref _examName, value);
         }
 
+        // 1. Ngày diễn ra kỳ thi
+        // 2. Binding đến UI để hiển thị và chỉnh sửa
+        // 3. Mặc định là ngày hiện tại
         public DateTime ExamDate
         {
             get => _examDate;
             set => SetProperty(ref _examDate, value);
         }
 
+        // 1. Thời gian làm bài thi (phút)
+        // 2. Binding đến UI để hiển thị và chỉnh sửa
+        // 3. Có thể null nếu không giới hạn thời gian
         public int? Duration
         {
             get => _duration;
             set => SetProperty(ref _duration, value);
         }
 
+        // 1. Tổng điểm của bài thi
+        // 2. Binding đến UI để hiển thị và chỉnh sửa
+        // 3. Mặc định là 100 điểm
         public int TotalMarks
         {
             get => _totalMarks;
             set => SetProperty(ref _totalMarks, value);
         }
 
+        // 1. Mô tả về kỳ thi
+        // 2. Binding đến UI để hiển thị và chỉnh sửa
+        // 3. Có thể để trống
         public string Description
         {
             get => _description;
             set => SetProperty(ref _description, value);
         }
 
+        // 1. Danh sách môn học cho kỳ thi
+        // 2. Binding đến ComboBox để hiển thị danh sách môn học
+        // 3. Được tải từ cơ sở dữ liệu
         public ObservableCollection<Subject> Subjects
         {
             get => _subjects;
             set => SetProperty(ref _subjects, value);
         }
 
+        // 1. Danh sách lớp học cho kỳ thi
+        // 2. Binding đến ComboBox để hiển thị danh sách lớp học
+        // 3. Được tải từ cơ sở dữ liệu
         public ObservableCollection<Class> Classes
         {
             get => _classes;
             set => SetProperty(ref _classes, value);
         }
 
+        // 1. Môn học được chọn cho kỳ thi
+        // 2. Binding đến ComboBox để hiển thị môn học đã chọn
+        // 3. Bắt buộc phải chọn
         public Subject? SelectedSubject
         {
             get => _selectedSubject;
             set => SetProperty(ref _selectedSubject, value);
         }
 
+        // 1. Lớp học được chọn cho kỳ thi
+        // 2. Binding đến ComboBox để hiển thị lớp học đã chọn
+        // 3. Bắt buộc phải chọn
         public Class? SelectedClass
         {
             get => _selectedClass;
             set => SetProperty(ref _selectedClass, value);
         }
 
+        // 1. Lệnh lưu kỳ thi
+        // 2. Binding đến nút Lưu trong UI
+        // 3. Khi được gọi, sẽ thực hiện phương thức SaveExam
         public ICommand SaveCommand { get; }
+        
+        // 1. Lệnh hủy bỏ thao tác
+        // 2. Binding đến nút Hủy trong UI
+        // 3. Khi được gọi, sẽ đóng hộp thoại mà không lưu
         public ICommand CancelCommand { get; }
 
+        // 1. Constructor của lớp
+        // 2. Khởi tạo các tham số và trạng thái ban đầu
+        // 3. Tải dữ liệu ban đầu từ cơ sở dữ liệu
         public ExamDialogViewModel(DatabaseService databaseService, Window dialogWindow, Exam? exam = null)
         {
             _databaseService = databaseService;
@@ -127,6 +233,9 @@ namespace StudentManagementV1._5.ViewModels
             InitializeDataAsync();
         }
 
+        // 1. Phương thức khởi tạo dữ liệu
+        // 2. Tải danh sách lớp học và môn học từ cơ sở dữ liệu
+        // 3. Thiết lập giá trị đã chọn nếu đang ở chế độ sửa
         private async void InitializeDataAsync()
         {
             try
@@ -153,6 +262,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Phương thức tải danh sách lớp học
+        // 2. Truy vấn cơ sở dữ liệu để lấy thông tin lớp học
+        // 3. Điền dữ liệu vào danh sách Classes
         private async Task LoadClassesAsync()
         {
             string query = "SELECT ClassID, ClassName FROM Classes WHERE IsActive = 1 ORDER BY ClassName";
@@ -174,6 +286,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Phương thức tải danh sách môn học
+        // 2. Truy vấn cơ sở dữ liệu để lấy thông tin môn học
+        // 3. Điền dữ liệu vào danh sách Subjects
         private async Task LoadSubjectsAsync()
         {
             string query = "SELECT SubjectID, SubjectName FROM Subjects WHERE IsActive = 1 ORDER BY SubjectName";
@@ -195,6 +310,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Phương thức lưu kỳ thi
+        // 2. Kiểm tra tính hợp lệ của dữ liệu
+        // 3. Tạo mới hoặc cập nhật kỳ thi trong cơ sở dữ liệu
         private async void SaveExam()
         {
             if (!ValidateExam())
@@ -225,6 +343,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Phương thức kiểm tra tính hợp lệ của dữ liệu kỳ thi
+        // 2. Kiểm tra các trường bắt buộc và giá trị hợp lệ
+        // 3. Hiển thị thông báo lỗi nếu có
         private bool ValidateExam()
         {
             // Basic validation
@@ -266,6 +387,9 @@ namespace StudentManagementV1._5.ViewModels
             return true;
         }
 
+        // 1. Phương thức tạo kỳ thi mới
+        // 2. Thực hiện truy vấn INSERT vào cơ sở dữ liệu
+        // 3. Hiển thị thông báo kết quả
         private async Task CreateExamAsync()
         {
             // Fixed: Removed CreatedAt column which doesn't exist in the database
@@ -313,6 +437,9 @@ namespace StudentManagementV1._5.ViewModels
                 "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
+        // 1. Phương thức cập nhật kỳ thi
+        // 2. Thực hiện truy vấn UPDATE vào cơ sở dữ liệu
+        // 3. Hiển thị thông báo kết quả
         private async Task UpdateExamAsync()
         {
             if (_originalExam == null) return;

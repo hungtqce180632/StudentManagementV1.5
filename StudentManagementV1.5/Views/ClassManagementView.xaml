@@ -1,4 +1,19 @@
-<!-- filepath: c:\Users\truon\Desktop\StudentManagementV1.5\StudentManagementV1.5\Views\ClassManagementView.xaml -->
+<!-- 
+    View ClassManagementView
+    
+    Tại sao sử dụng:
+    - Hiển thị và quản lý danh sách lớp học trong hệ thống
+    - Cho phép tìm kiếm, lọc, tạo mới, chỉnh sửa và xóa lớp học
+    
+    Quan hệ với các lớp khác:
+    - Data Context: ClassManagementViewModel
+    - Tương tác với AddEditClassView để thêm và sửa lớp học
+    
+    Chức năng chính:
+    - Hiển thị danh sách lớp học với thông tin chi tiết
+    - Tìm kiếm lớp học theo tên, khối lớp hoặc phòng học
+    - Tạo mới, chỉnh sửa và xóa lớp học
+ -->
 <UserControl x:Class="StudentManagementV1._5.Views.ClassManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

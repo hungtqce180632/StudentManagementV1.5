@@ -11,26 +11,74 @@ using System.Windows.Input;
 
 namespace StudentManagementV1._5.ViewModels
 {
+    // Lớp UserManagementViewModel
+    // + Tại sao cần sử dụng: Quản lý và hiển thị danh sách người dùng trong hệ thống
+    // + Lớp này được gọi từ màn hình quản lý người dùng (UserManagementView)
+    // + Chức năng chính: Tìm kiếm, lọc, thêm, sửa và xóa người dùng
     public class UserManagementViewModel : ViewModelBase
     {
+        // 1. Dịch vụ cơ sở dữ liệu để truy vấn và cập nhật thông tin người dùng
+        // 2. Được truyền vào từ constructor
+        // 3. Dùng để tải và thao tác với dữ liệu người dùng
         private readonly DatabaseService _databaseService;
+        
+        // 1. Dịch vụ xác thực người dùng
+        // 2. Được truyền vào từ constructor
+        // 3. Dùng để lấy thông tin người dùng hiện tại và kiểm tra quyền
         private readonly AuthenticationService _authService;
+        
+        // 1. Dịch vụ điều hướng
+        // 2. Được truyền vào từ constructor
+        // 3. Dùng để chuyển đổi giữa các màn hình
         private readonly NavigationService _navigationService;
 
+        // 1. Danh sách người dùng hiển thị trong UI
+        // 2. Binding đến DataGrid hoặc ListView 
+        // 3. Được tải từ cơ sở dữ liệu và lọc theo các điều kiện
         private ObservableCollection<User> _users = new ObservableCollection<User>();
+        
+        // 1. Từ khóa tìm kiếm
+        // 2. Binding đến TextBox tìm kiếm
+        // 3. Dùng để lọc người dùng theo tên, email hoặc thông tin khác
         private string _searchText = string.Empty;
+        
+        // 1. Vai trò được chọn để lọc
+        // 2. Binding đến ComboBox lọc theo vai trò
+        // 3. Có thể là "All", "Admin", "Teacher" hoặc "Student"
         private string _selectedRole = "All";
+        
+        // 1. Trạng thái đang tải dữ liệu
+        // 2. Binding đến indicator trong UI
+        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
         private bool _isLoading;
+        
+        // 1. Người dùng được chọn trong danh sách
+        // 2. Binding đến SelectedItem của DataGrid/ListView
+        // 3. Dùng cho các thao tác sửa, xóa hoặc hiển thị chi tiết
         private User _selectedUser;
+        
+        // 1. Tùy chọn hiển thị người dùng không hoạt động
+        // 2. Binding đến CheckBox trong UI
+        // 3. Khi thay đổi sẽ lọc danh sách người dùng
         private bool _showInactiveUsers = false;
+        
+        // 1. Danh sách các vai trò có thể lọc
+        // 2. Binding đến ItemsSource của ComboBox lọc vai trò
+        // 3. Được khởi tạo với các vai trò trong hệ thống
         private ObservableCollection<string> _availableRoles = new ObservableCollection<string>();
 
+        // 1. Danh sách người dùng hiển thị trong UI
+        // 2. Binding đến DataGrid hoặc ListView
+        // 3. Được tải từ cơ sở dữ liệu và lọc theo các điều kiện
         public ObservableCollection<User> Users
         {
             get => _users;
             set => SetProperty(ref _users, value);
         }
 
+        // 1. Từ khóa tìm kiếm
+        // 2. Binding đến TextBox tìm kiếm
+        // 3. Khi thay đổi sẽ gọi LoadUsersAsync để cập nhật danh sách
         public string SearchText
         {
             get => _searchText;
@@ -43,6 +91,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Vai trò được chọn để lọc
+        // 2. Binding đến ComboBox lọc theo vai trò
+        // 3. Khi thay đổi sẽ gọi LoadUsersAsync để cập nhật danh sách
         public string SelectedRole
         {
             get => _selectedRole;
@@ -55,6 +106,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Tùy chọn hiển thị người dùng không hoạt động
+        // 2. Binding đến CheckBox trong UI
+        // 3. Khi thay đổi sẽ gọi LoadUsersAsync để cập nhật danh sách
         public bool ShowInactiveUsers
         {
             get => _showInactiveUsers;
@@ -67,29 +121,56 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Danh sách các vai trò có thể lọc
+        // 2. Binding đến ItemsSource của ComboBox lọc vai trò
+        // 3. Được khởi tạo với các vai trò trong hệ thống
         public ObservableCollection<string> AvailableRoles
         {
             get => _availableRoles;
             set => SetProperty(ref _availableRoles, value);
         }
 
+        // 1. Trạng thái đang tải dữ liệu
+        // 2. Binding đến indicator trong UI
+        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
         public bool IsLoading
         {
             get => _isLoading;
             set => SetProperty(ref _isLoading, value);
         }
 
+        // 1. Người dùng được chọn trong danh sách
+        // 2. Binding đến SelectedItem của DataGrid/ListView
+        // 3. Dùng cho các thao tác sửa, xóa hoặc hiển thị chi tiết
         public User SelectedUser
         {
             get => _selectedUser;
             set => SetProperty(ref _selectedUser, value);
         }
 
+        // 1. Lệnh thêm người dùng mới
+        // 2. Binding đến nút "Thêm người dùng" trong UI
+        // 3. Khi được gọi, mở hộp thoại thêm người dùng
         public ICommand AddUserCommand { get; }
+        
+        // 1. Lệnh sửa người dùng
+        // 2. Binding đến nút "Sửa" trong UI
+        // 3. Khi được gọi, mở hộp thoại sửa người dùng với thông tin đã chọn
         public ICommand EditUserCommand { get; }
+        
+        // 1. Lệnh xóa người dùng
+        // 2. Binding đến nút "Xóa" trong UI
+        // 3. Khi được gọi, hiển thị xác nhận và xóa người dùng đã chọn
         public ICommand DeleteUserCommand { get; }
+        
+        // 1. Lệnh quay lại
+        // 2. Binding đến nút "Quay lại" trong UI
+        // 3. Khi được gọi, chuyển về màn hình dashboard
         public ICommand BackCommand { get; }
 
+        // 1. Constructor của lớp
+        // 2. Khởi tạo các tham số và thiết lập lệnh
+        // 3. Tải dữ liệu ban đầu từ cơ sở dữ liệu
         public UserManagementViewModel(DatabaseService databaseService, AuthenticationService authService, NavigationService navigationService)
         {
             _databaseService = databaseService;
@@ -111,6 +192,9 @@ namespace StudentManagementV1._5.ViewModels
             LoadUsersAsync();
         }
 
+        // 1. Phương thức tải danh sách người dùng
+        // 2. Truy vấn cơ sở dữ liệu với các điều kiện lọc
+        // 3. Cập nhật danh sách Users với kết quả tìm kiếm
         private async void LoadUsersAsync()
         {
             try
@@ -137,6 +221,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
         
+        // 1. Phương thức xây dựng câu truy vấn SQL
+        // 2. Tạo câu truy vấn dựa trên điều kiện tìm kiếm và bộ lọc
+        // 3. Trả về chuỗi truy vấn SQL hoàn chỉnh
         private string BuildUserQuery()
         {
             string query = @"
@@ -192,6 +279,9 @@ namespace StudentManagementV1._5.ViewModels
             return query;
         }
         
+        // 1. Phương thức tạo tham số cho truy vấn
+        // 2. Tạo dictionary chứa các tham số truy vấn
+        // 3. Trả về dictionary với tham số vai trò và tìm kiếm (nếu có)
         private Dictionary<string, object> BuildQueryParameters()
         {
             var parameters = new Dictionary<string, object>();
@@ -209,6 +299,9 @@ namespace StudentManagementV1._5.ViewModels
             return parameters;
         }
         
+        // 1. Phương thức điền dữ liệu từ DataTable vào danh sách Users
+        // 2. Chuyển đổi từng dòng dữ liệu thành đối tượng User
+        // 3. Thêm đối tượng User vào danh sách Users
         private void PopulateUsersFromDataTable(DataTable dataTable)
         {
             foreach (DataRow row in dataTable.Rows)
@@ -227,6 +320,9 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
+        // 1. Phương thức mở hộp thoại thêm người dùng
+        // 2. Hiển thị thông báo chức năng sẽ được triển khai trong tương lai
+        // 3. Sẽ mở hộp thoại thực sự trong triển khai tương lai
         private void OpenAddUserDialog()
         {
             // Show dialog to add new user
@@ -234,6 +330,9 @@ namespace StudentManagementV1._5.ViewModels
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
+        // 1. Phương thức mở hộp thoại sửa người dùng
+        // 2. Hiển thị thông báo chức năng sẽ được triển khai trong tương lai
+        // 3. Sẽ mở hộp thoại sửa với thông tin người dùng đã chọn trong triển khai tương lai
         private void OpenEditUserDialog(User user)
         {
             if (user == null) return;
@@ -243,6 +342,9 @@ namespace StudentManagementV1._5.ViewModels
                 "Information", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
+        // 1. Phương thức xóa người dùng
+        // 2. Hiển thị hộp thoại xác nhận trước khi xóa
+        // 3. Nếu xác nhận, hủy kích hoạt người dùng thay vì xóa hoàn toàn
         private async Task DeleteUserAsync(User user)
         {
             if (user == null) return;

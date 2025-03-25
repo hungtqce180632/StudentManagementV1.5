@@ -1,3 +1,19 @@
+<!-- 
+    View StudentDashboardView
+    
+    Tại sao sử dụng:
+    - Màn hình chính cho học sinh sau khi đăng nhập
+    - Hiển thị tổng quan về thông tin học tập và các chức năng có thể truy cập
+    
+    Quan hệ với các lớp khác:
+    - Data Context: StudentDashboardViewModel
+    - Sử dụng các Style được định nghĩa trong ResourceDictionary
+    
+    Chức năng chính:
+    - Hiển thị thống kê về các môn học, bài tập, bài nộp và điểm GPA
+    - Cung cấp menu điều hướng đến các chức năng dành cho học sinh
+    - Hiển thị danh sách bài tập sắp đến hạn và điểm số gần đây
+ -->
 <UserControl x:Class="StudentManagementV1._5.Views.StudentDashboardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

@@ -8,18 +8,38 @@ using System.Threading.Tasks;
 
 namespace StudentManagementV1._5.Services
 {
+    // Lớp AuthenticationService
+    // + Tại sao cần sử dụng: Quản lý xác thực người dùng và bảo mật trong hệ thống
+    // + Lớp này được gọi từ các ViewModel đăng nhập và khôi phục mật khẩu
+    // + Chức năng chính: Đăng nhập, đăng xuất và quản lý bảo mật tài khoản
     public class AuthenticationService
     {
+        // 1. Tham chiếu đến dịch vụ cơ sở dữ liệu
+        // 2. Dùng để truy vấn thông tin người dùng và xác thực
+        // 3. Được truyền vào từ constructor
         private readonly DatabaseService _databaseService;
+        
+        // 1. Lưu trữ thông tin người dùng hiện tại đang đăng nhập
+        // 2. Null khi chưa đăng nhập hoặc đã đăng xuất
+        // 3. Được cập nhật khi đăng nhập thành công
         private User? _currentUser;
 
+        // 1. Thuộc tính cung cấp thông tin người dùng hiện tại
+        // 2. Được truy cập từ các ViewModel để xác định quyền truy cập
+        // 3. Chỉ đọc để ngăn chặn việc thay đổi không mong muốn
         public User? CurrentUser => _currentUser;
 
+        // 1. Constructor của AuthenticationService
+        // 2. Nhận tham chiếu đến DatabaseService
+        // 3. Khởi tạo service mà không cần đăng nhập
         public AuthenticationService(DatabaseService databaseService)
         {
             _databaseService = databaseService;
         }
 
+        // 1. Phương thức đăng nhập người dùng
+        // 2. Kiểm tra tên đăng nhập và mật khẩu
+        // 3. Cập nhật thông tin người dùng hiện tại nếu đăng nhập thành công
         public async Task<bool> LoginAsync(string username, string password)
         {
             string query = "SELECT * FROM Users WHERE Username = @Username AND IsActive = 1";
@@ -114,6 +134,9 @@ namespace StudentManagementV1._5.Services
             return false;
         }
 
+        // 1. Phương thức đặt lại mật khẩu
+        // 2. Xác minh token và cập nhật mật khẩu mới
+        // 3. Trả về true nếu đặt lại thành công, false nếu token không hợp lệ
         public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword)
         {
             // Verify token is valid
@@ -158,6 +181,9 @@ namespace StudentManagementV1._5.Services
             return true;
         }
 
+        // 1. Phương thức yêu cầu đặt lại mật khẩu
+        // 2. Kiểm tra email và tạo token đặt lại mật khẩu
+        // 3. Lưu token vào cơ sở dữ liệu với thời gian hết hạn
         public async Task<bool> RequestPasswordResetAsync(string email)
         {
             // Check if user exists
@@ -192,6 +218,9 @@ namespace StudentManagementV1._5.Services
             return true;
         }
 
+        // 1. Phương thức đăng xuất
+        // 2. Xóa thông tin người dùng hiện tại
+        // 3. Được gọi khi người dùng đăng xuất hoặc phiên hết hạn
         public void Logout()
         {
             _currentUser = null;

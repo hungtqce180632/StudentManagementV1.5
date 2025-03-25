@@ -1,3 +1,19 @@
+<!-- 
+    View TeacherDashboardView
+    
+    Tại sao sử dụng:
+    - Màn hình chính cho giáo viên sau khi đăng nhập
+    - Hiển thị tổng quan về các lớp, học sinh và bài tập
+    
+    Quan hệ với các lớp khác:
+    - Data Context: TeacherDashboardViewModel
+    - Sử dụng các Style được định nghĩa trong ResourceDictionary
+    
+    Chức năng chính:
+    - Hiển thị thống kê về các lớp học, học sinh, bài tập được giao
+    - Cung cấp menu điều hướng đến các chức năng dành cho giáo viên
+    - Hiển thị lịch dạy học sắp tới và các thao tác nhanh
+ -->
 <UserControl x:Class="StudentManagementV1._5.Views.TeacherDashboardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

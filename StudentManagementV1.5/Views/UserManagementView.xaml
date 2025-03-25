@@ -1,3 +1,20 @@
+<!-- 
+    View UserManagementView
+    
+    Tại sao sử dụng:
+    - Hiển thị và quản lý danh sách người dùng trong hệ thống
+    - Cho phép tìm kiếm, lọc, thêm, chỉnh sửa và xóa tài khoản
+    
+    Quan hệ với các lớp khác:
+    - Data Context: UserManagementViewModel
+    - Sử dụng các converter để hiển thị trạng thái người dùng
+    
+    Chức năng chính:
+    - Hiển thị danh sách người dùng với thông tin chi tiết
+    - Tìm kiếm người dùng theo tên, email hoặc tên đầy đủ
+    - Lọc người dùng theo vai trò và trạng thái hoạt động
+    - Thêm, chỉnh sửa và xóa người dùng
+ -->
 <UserControl x:Class="StudentManagementV1._5.Views.UserManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

@@ -1,3 +1,19 @@
+<!-- 
+    View ScheduleManagementView
+    
+    Tại sao sử dụng:
+    - Hiển thị và quản lý lịch học trong hệ thống
+    - Cho phép lọc, thêm, chỉnh sửa và xóa lịch học
+    
+    Quan hệ với các lớp khác:
+    - Data Context: ScheduleManagementViewModel
+    - Sử dụng các data binding để hiển thị và cập nhật dữ liệu
+    
+    Chức năng chính:
+    - Hiển thị danh sách lịch học theo lớp và ngày trong tuần
+    - Lọc lịch học theo lớp học và ngày trong tuần
+    - Thêm, chỉnh sửa và xóa lịch học
+ -->
 <UserControl x:Class="StudentManagementV1._5.Views.ScheduleManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
