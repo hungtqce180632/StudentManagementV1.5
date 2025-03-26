@@ -7,11 +7,11 @@
     
     Quan hệ với các lớp khác:
     - Data Context: ScheduleManagementViewModel
-    - Sử dụng các data binding để hiển thị và cập nhật dữ liệu
+    - Sử dụng các dialog để thêm và sửa lịch học
     
     Chức năng chính:
-    - Hiển thị danh sách lịch học theo lớp và ngày trong tuần
-    - Lọc lịch học theo lớp học và ngày trong tuần
+    - Hiển thị danh sách lịch học với thông tin chi tiết
+    - Lọc lịch học theo lớp và ngày trong tuần
     - Thêm, chỉnh sửa và xóa lịch học
  -->
 <UserControl x:Class="StudentManagementV1._5.Views.ScheduleManagementView"
@@ -21,7 +21,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:StudentManagementV1._5.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="650" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -31,102 +31,62 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="20,20,20,10">
-            <TextBlock Text="Class Schedule Management" 
-                       FontSize="24" 
-                       FontWeight="Bold" 
-                       Margin="0,0,0,10"/>
-            <TextBlock Text="Create and manage class schedules for students and teachers." 
-                       Opacity="0.7"
-                       TextWrapping="Wrap"/>
-            <Separator Margin="0,15,0,0"/>
-        </StackPanel>
+        <TextBlock Grid.Row="0" Text="Schedule Management" FontSize="24" FontWeight="Bold" Margin="10"/>
 
-        <!-- Filters -->
-        <Grid Grid.Row="1" Margin="20,0,20,10">
+        <!-- Filter Row -->
+        <Grid Grid.Row="1" Margin="10">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             
-            <ComboBox Grid.Column="0" 
-                      ItemsSource="{Binding Classes}"
-                      SelectedItem="{Binding SelectedClass}"
-                      Margin="0,0,10,0"
-                      Width="200"
-                      HorizontalAlignment="Left">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding ClassName}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,20,0">
+                <TextBlock Text="Class:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox Width="150" 
+                          ItemsSource="{Binding Classes}"
+                          SelectedItem="{Binding SelectedClass}"
+                          DisplayMemberPath="ClassName"/>
+            </StackPanel>
             
-            <ComboBox Grid.Column="1" 
-                      ItemsSource="{Binding DaysOfWeek}"
-                      SelectedItem="{Binding SelectedDay}"
-                      Margin="0,0,10,0"
-                      Width="150"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,20,0">
+                <TextBlock Text="Day:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox Width="120" 
+                          ItemsSource="{Binding Days}"
+                          SelectedItem="{Binding SelectedDay}"/>
+            </StackPanel>
             
-            <Button Grid.Column="2" 
-                    Content="Apply Filters" 
-                    Command="{Binding ApplyFiltersCommand}"
-                    Margin="0,0,10,0"
-                    Padding="10,5"/>
+            <Button Grid.Column="2" Content="Apply Filters" Command="{Binding ApplyFiltersCommand}" 
+                    Padding="10,5" Margin="0,0,20,0"/>
             
-            <Button Grid.Column="3" 
-                    Content="+ Add Schedule" 
-                    Command="{Binding AddScheduleCommand}"
-                    Background="#2196F3" 
-                    Foreground="White" 
-                    Padding="10,5"/>
+            <Button Grid.Column="4" Content="+ Add Schedule" Command="{Binding AddScheduleCommand}" 
+                    Background="#2196F3" Foreground="White" Padding="10,5"/>
         </Grid>
 
-        <!-- Schedule Data Grid -->
-        <DataGrid Grid.Row="2" 
-                  Margin="20,0,20,0"
-                  AutoGenerateColumns="False"
-                  ItemsSource="{Binding Schedules}"
-                  SelectedItem="{Binding SelectedSchedule}"
-                  IsReadOnly="True"
-                  GridLinesVisibility="All"
-                  AlternatingRowBackground="#F5F5F5"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  CanUserResizeRows="False"
-                  SelectionMode="Single"
-                  SelectionUnit="FullRow"
-                  BorderThickness="1"
-                  BorderBrush="#E0E0E0">
+        <!-- Data Grid -->
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Schedules}" SelectedItem="{Binding SelectedSchedule}"
+                  AutoGenerateColumns="False" IsReadOnly="True" Margin="10"
+                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#DDDDDD"
+                  CanUserSortColumns="True" CanUserResizeColumns="True">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Day" Binding="{Binding DayOfWeek}" Width="80"/>
-                <DataGridTextColumn Header="Start Time" Binding="{Binding StartTime, StringFormat=hh\\:mm}" Width="100"/>
-                <DataGridTextColumn Header="End Time" Binding="{Binding EndTime, StringFormat=hh\\:mm}" Width="100"/>
                 <DataGridTextColumn Header="Class" Binding="{Binding ClassName}" Width="120"/>
                 <DataGridTextColumn Header="Subject" Binding="{Binding SubjectName}" Width="150"/>
                 <DataGridTextColumn Header="Teacher" Binding="{Binding TeacherName}" Width="150"/>
+                <DataGridTextColumn Header="Day" Binding="{Binding DayOfWeek}" Width="100"/>
+                <DataGridTextColumn Header="Time" Binding="{Binding TimeDisplay}" Width="120"/>
                 <DataGridTextColumn Header="Room" Binding="{Binding Room}" Width="80"/>
-                <DataGridTemplateColumn Header="Actions" Width="120">
+                <DataGridTemplateColumn Header="Actions" Width="150">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <Button Content="Edit" 
-                                        Command="{Binding DataContext.EditScheduleCommand, 
-                                        RelativeSource={RelativeSource FindAncestor, 
-                                        AncestorType={x:Type DataGrid}}}" 
-                                        CommandParameter="{Binding}"
-                                        Margin="0,0,5,0"
-                                        Padding="8,2"/>
-                                <Button Content="Delete" 
-                                        Command="{Binding DataContext.DeleteScheduleCommand, 
-                                        RelativeSource={RelativeSource FindAncestor, 
-                                        AncestorType={x:Type DataGrid}}}" 
-                                        CommandParameter="{Binding}"
-                                        Background="#f44336" 
-                                        Foreground="White"
-                                        Padding="8,2"/>
+                                <Button Content="Edit" Command="{Binding DataContext.EditScheduleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}" Margin="0,0,5,0" Padding="5,2"
+                                        Background="#2196F3" Foreground="White"/>
+                                <Button Content="Delete" Command="{Binding DataContext.DeleteScheduleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}" Padding="5,2"
+                                        Background="#f44336" Foreground="White"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -134,14 +94,16 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- Bottom Button Area -->
-        <StackPanel Grid.Row="3" 
-                    Orientation="Horizontal" 
-                    HorizontalAlignment="Right" 
-                    Margin="20,10,20,20">
-            <Button Content="Back to Dashboard" 
-                    Command="{Binding NavigateBackCommand}"
-                    Padding="10,5"/>
-        </StackPanel>
+        <!-- Footer -->
+        <Button Grid.Row="3" Content="Back to Dashboard" Command="{Binding NavigateBackCommand}" 
+                HorizontalAlignment="Left" Margin="10" Padding="10,5"/>
+
+        <!-- Loading Overlay -->
+        <Grid Grid.RowSpan="4" Background="#80000000" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Loading..." Foreground="White" FontSize="16" HorizontalAlignment="Center"/>
+                <ProgressBar IsIndeterminate="True" Width="200" Height="10" Margin="0,10,0,0"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

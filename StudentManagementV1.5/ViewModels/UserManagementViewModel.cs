@@ -1,6 +1,7 @@
 using StudentManagementV1._5.Commands;
 using StudentManagementV1._5.Models;
 using StudentManagementV1._5.Services;
+using StudentManagementV1._5.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -44,41 +45,36 @@ namespace StudentManagementV1._5.ViewModels
         
         // 1. Vai trò được chọn để lọc
         // 2. Binding đến ComboBox lọc theo vai trò
-        // 3. Có thể là "All", "Admin", "Teacher" hoặc "Student"
+        // 3. Cho phép lọc người dùng theo vai trò cụ thể
         private string _selectedRole = "All";
         
-        // 1. Trạng thái đang tải dữ liệu
-        // 2. Binding đến indicator trong UI
-        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
+        // 1. Cờ đánh dấu có hiển thị người dùng không hoạt động hay không
+        // 2. Binding đến CheckBox hiển thị người dùng không hoạt động
+        // 3. Ảnh hưởng đến câu truy vấn lấy dữ liệu
+        private bool _showInactiveUsers;
+        
+        // 1. Cờ đánh dấu đang tải dữ liệu
+        // 2. Binding đến overlay loading
+        // 3. Hiển thị hiệu ứng loading khi đang tải dữ liệu
         private bool _isLoading;
         
         // 1. Người dùng được chọn trong danh sách
-        // 2. Binding đến SelectedItem của DataGrid/ListView
-        // 3. Dùng cho các thao tác sửa, xóa hoặc hiển thị chi tiết
+        // 2. Binding đến SelectedItem của DataGrid
+        // 3. Được sử dụng cho các thao tác sửa và xóa
         private User _selectedUser;
-        
-        // 1. Tùy chọn hiển thị người dùng không hoạt động
-        // 2. Binding đến CheckBox trong UI
-        // 3. Khi thay đổi sẽ lọc danh sách người dùng
-        private bool _showInactiveUsers = false;
-        
-        // 1. Danh sách các vai trò có thể lọc
-        // 2. Binding đến ItemsSource của ComboBox lọc vai trò
-        // 3. Được khởi tạo với các vai trò trong hệ thống
-        private ObservableCollection<string> _availableRoles = new ObservableCollection<string>();
 
-        // 1. Danh sách người dùng hiển thị trong UI
-        // 2. Binding đến DataGrid hoặc ListView
-        // 3. Được tải từ cơ sở dữ liệu và lọc theo các điều kiện
+        // 1. Danh sách vai trò có sẵn để lọc
+        // 2. Binding đến ComboBox lọc theo vai trò
+        // 3. Bao gồm tất cả vai trò trong hệ thống và lựa chọn "All"
+        public ObservableCollection<string> AvailableRoles { get; } = new ObservableCollection<string>();
+
+        // Các thuộc tính công khai với getter và setter
         public ObservableCollection<User> Users
         {
             get => _users;
             set => SetProperty(ref _users, value);
         }
 
-        // 1. Từ khóa tìm kiếm
-        // 2. Binding đến TextBox tìm kiếm
-        // 3. Khi thay đổi sẽ gọi LoadUsersAsync để cập nhật danh sách
         public string SearchText
         {
             get => _searchText;
@@ -91,9 +87,6 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
-        // 1. Vai trò được chọn để lọc
-        // 2. Binding đến ComboBox lọc theo vai trò
-        // 3. Khi thay đổi sẽ gọi LoadUsersAsync để cập nhật danh sách
         public string SelectedRole
         {
             get => _selectedRole;
@@ -106,9 +99,6 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
-        // 1. Tùy chọn hiển thị người dùng không hoạt động
-        // 2. Binding đến CheckBox trong UI
-        // 3. Khi thay đổi sẽ gọi LoadUsersAsync để cập nhật danh sách
         public bool ShowInactiveUsers
         {
             get => _showInactiveUsers;
@@ -121,27 +111,12 @@ namespace StudentManagementV1._5.ViewModels
             }
         }
 
-        // 1. Danh sách các vai trò có thể lọc
-        // 2. Binding đến ItemsSource của ComboBox lọc vai trò
-        // 3. Được khởi tạo với các vai trò trong hệ thống
-        public ObservableCollection<string> AvailableRoles
-        {
-            get => _availableRoles;
-            set => SetProperty(ref _availableRoles, value);
-        }
-
-        // 1. Trạng thái đang tải dữ liệu
-        // 2. Binding đến indicator trong UI
-        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
         public bool IsLoading
         {
             get => _isLoading;
             set => SetProperty(ref _isLoading, value);
         }
 
-        // 1. Người dùng được chọn trong danh sách
-        // 2. Binding đến SelectedItem của DataGrid/ListView
-        // 3. Dùng cho các thao tác sửa, xóa hoặc hiển thị chi tiết
         public User SelectedUser
         {
             get => _selectedUser;
@@ -188,117 +163,77 @@ namespace StudentManagementV1._5.ViewModels
             AvailableRoles.Add("Teacher");
             AvailableRoles.Add("Student");
 
-            // Load users when ViewModel is created
+            // Load initial data
             LoadUsersAsync();
         }
 
         // 1. Phương thức tải danh sách người dùng
         // 2. Truy vấn cơ sở dữ liệu với các điều kiện lọc
-        // 3. Cập nhật danh sách Users với kết quả tìm kiếm
+        // 3. Áp dụng bộ lọc theo tìm kiếm, vai trò và trạng thái
         private async void LoadUsersAsync()
         {
+            IsLoading = true;
+            Users.Clear();
+
             try
             {
-                IsLoading = true;
-                
-                string query = BuildUserQuery();
-                var parameters = BuildQueryParameters();
+                string query = @"
+                    SELECT 
+                        u.UserID, u.Username, u.Email, u.Role, u.IsActive, u.CreatedDate, u.LastLoginDate,
+                        CASE 
+                            WHEN u.Role = 'Student' THEN CONCAT(s.FirstName, ' ', s.LastName)
+                            WHEN u.Role = 'Teacher' THEN CONCAT(t.FirstName, ' ', t.LastName)
+                            ELSE u.Username
+                        END as FullName
+                    FROM Users u
+                    LEFT JOIN Students s ON u.UserID = s.UserID AND u.Role = 'Student'
+                    LEFT JOIN Teachers t ON u.UserID = t.UserID AND u.Role = 'Teacher'
+                    WHERE 1=1";
+
+                var parameters = new Dictionary<string, object>();
+
+                // Apply role filter
+                if (_selectedRole != "All")
+                {
+                    query += " AND u.Role = @Role";
+                    parameters.Add("@Role", _selectedRole);
+                }
+
+                // Apply active filter
+                if (!_showInactiveUsers)
+                {
+                    query += " AND u.IsActive = 1";
+                }
+
+                // Apply search filter
+                if (!string.IsNullOrWhiteSpace(_searchText))
+                {
+                    query += @" AND (
+                        u.Username LIKE @Search 
+                        OR u.Email LIKE @Search 
+                        OR CONCAT(ISNULL(s.FirstName, ''), ' ', ISNULL(s.LastName, '')) LIKE @Search
+                        OR CONCAT(ISNULL(t.FirstName, ''), ' ', ISNULL(t.LastName, '')) LIKE @Search
+                    )";
+                    parameters.Add("@Search", $"%{_searchText}%");
+                }
+
+                // Order by
+                query += " ORDER BY u.UserID";
+
                 DataTable result = await _databaseService.ExecuteQueryAsync(query, parameters);
-                
-                // Update UI on the dispatcher thread to avoid collection modified exception
-                Application.Current.Dispatcher.Invoke(() => {
-                    Users.Clear();
-                    PopulateUsersFromDataTable(result);
-                });
+                PopulateUsersFromDataTable(result);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading users: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error loading users: {ex.Message}", "Error", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
                 IsLoading = false;
             }
         }
-        
-        // 1. Phương thức xây dựng câu truy vấn SQL
-        // 2. Tạo câu truy vấn dựa trên điều kiện tìm kiếm và bộ lọc
-        // 3. Trả về chuỗi truy vấn SQL hoàn chỉnh
-        private string BuildUserQuery()
-        {
-            string query = @"
-                SELECT 
-                    u.UserID, 
-                    u.Username, 
-                    u.Email, 
-                    u.Role, 
-                    u.IsActive, 
-                    u.CreatedDate, 
-                    u.LastLoginDate,
-                    CASE 
-                        WHEN u.Role = 'Teacher' THEN (SELECT FirstName + ' ' + LastName FROM Teachers t WHERE t.UserID = u.UserID)
-                        WHEN u.Role = 'Student' THEN (SELECT FirstName + ' ' + LastName FROM Students s WHERE s.UserID = u.UserID)
-                        ELSE u.Username
-                    END AS FullName
-                FROM Users u
-                WHERE 1=1";
-            
-            // Apply role filter
-            if (_selectedRole != "All")
-            {
-                query += " AND u.Role = @Role";
-            }
-            
-            // Apply active status filter
-            if (!_showInactiveUsers)
-            {
-                query += " AND u.IsActive = 1";
-            }
-            
-            // Apply search filter
-            if (!string.IsNullOrWhiteSpace(_searchText))
-            {
-                query += @" AND (
-                    u.Username LIKE @Search 
-                    OR u.Email LIKE @Search 
-                    OR (u.Role = 'Teacher' AND EXISTS (
-                        SELECT 1 FROM Teachers t 
-                        WHERE t.UserID = u.UserID 
-                        AND (t.FirstName LIKE @Search OR t.LastName LIKE @Search)
-                    ))
-                    OR (u.Role = 'Student' AND EXISTS (
-                        SELECT 1 FROM Students s 
-                        WHERE s.UserID = u.UserID 
-                        AND (s.FirstName LIKE @Search OR s.LastName LIKE @Search)
-                    ))
-                )";
-            }
-            
-            query += " ORDER BY u.Username";
-            
-            return query;
-        }
-        
-        // 1. Phương thức tạo tham số cho truy vấn
-        // 2. Tạo dictionary chứa các tham số truy vấn
-        // 3. Trả về dictionary với tham số vai trò và tìm kiếm (nếu có)
-        private Dictionary<string, object> BuildQueryParameters()
-        {
-            var parameters = new Dictionary<string, object>();
-            
-            if (_selectedRole != "All")
-            {
-                parameters["@Role"] = _selectedRole;
-            }
-            
-            if (!string.IsNullOrWhiteSpace(_searchText))
-            {
-                parameters["@Search"] = $"%{_searchText}%";
-            }
-            
-            return parameters;
-        }
-        
+
         // 1. Phương thức điền dữ liệu từ DataTable vào danh sách Users
         // 2. Chuyển đổi từng dòng dữ liệu thành đối tượng User
         // 3. Thêm đối tượng User vào danh sách Users
@@ -321,25 +256,41 @@ namespace StudentManagementV1._5.ViewModels
         }
 
         // 1. Phương thức mở hộp thoại thêm người dùng
-        // 2. Hiển thị thông báo chức năng sẽ được triển khai trong tương lai
-        // 3. Sẽ mở hộp thoại thực sự trong triển khai tương lai
+        // 2. Tạo và hiển thị UserDialogView với UserDialogViewModel
+        // 3. Tải lại danh sách người dùng nếu thêm thành công
         private void OpenAddUserDialog()
         {
-            // Show dialog to add new user
-            MessageBox.Show("Add user functionality will be implemented here", "Information", 
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            var viewModel = new UserDialogViewModel(_databaseService);
+            var dialog = new UserDialogView(viewModel)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            bool? result = dialog.ShowDialog();
+            if (result == true)
+            {
+                LoadUsersAsync();
+            }
         }
 
         // 1. Phương thức mở hộp thoại sửa người dùng
-        // 2. Hiển thị thông báo chức năng sẽ được triển khai trong tương lai
-        // 3. Sẽ mở hộp thoại sửa với thông tin người dùng đã chọn trong triển khai tương lai
+        // 2. Tạo và hiển thị UserDialogView với UserDialogViewModel và dữ liệu người dùng
+        // 3. Tải lại danh sách người dùng nếu cập nhật thành công
         private void OpenEditUserDialog(User user)
         {
             if (user == null) return;
             
-            // Show dialog to edit user
-            MessageBox.Show($"Edit user {user.Username} functionality will be implemented here", 
-                "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            var viewModel = new UserDialogViewModel(_databaseService, user);
+            var dialog = new UserDialogView(viewModel)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            bool? result = dialog.ShowDialog();
+            if (result == true)
+            {
+                LoadUsersAsync();
+            }
         }
 
         // 1. Phương thức xóa người dùng
@@ -362,25 +313,25 @@ namespace StudentManagementV1._5.ViewModels
                     // Check if this is the currently logged-in user
                     if (user.UserID == _authService.CurrentUser?.UserID)
                     {
-                        MessageBox.Show("You cannot delete your own account while logged in.", 
-                            "Operation Not Allowed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show("You cannot delete your own account while logged in.",
+                            "Operation not allowed", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
 
-                    // Instead of actually deleting, we'll set IsActive = 0
-                    string query = $"UPDATE Users SET IsActive = 0 WHERE UserID = {user.UserID}";
-                    await _databaseService.ExecuteNonQueryAsync(query);
+                    // Soft delete - set IsActive to false
+                    string query = "UPDATE Users SET IsActive = 0 WHERE UserID = @UserID";
+                    var parameters = new Dictionary<string, object>
+                    {
+                        { "@UserID", user.UserID }
+                    };
 
-                    // Refresh the list
+                    await _databaseService.ExecuteNonQueryAsync(query, parameters);
                     LoadUsersAsync();
-
-                    MessageBox.Show($"User {user.Username} has been deactivated.", 
-                        "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error deleting user: {ex.Message}", 
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Error deleting user: {ex.Message}", "Error", 
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 finally
                 {

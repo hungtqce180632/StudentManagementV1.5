@@ -241,7 +241,7 @@ namespace StudentManagementV1._5.ViewModels
                     SubjectID = Convert.ToInt32(row["SubjectID"]),
                     SubjectName = row["SubjectName"].ToString() ?? string.Empty,
                     Description = row["Description"].ToString() ?? string.Empty,
-                    Credits = row["Credits"] != DBNull.Value ? Convert.ToInt32(row["Credits"]) : null,
+                    Credits = row["Credits"] != DBNull.Value ? Convert.ToInt32(row["Credits"]) : 0,
                     ClassCount = row["ClassCount"] != DBNull.Value ? Convert.ToInt32(row["ClassCount"]) : 0,
                     TeacherCount = row["TeacherCount"] != DBNull.Value ? Convert.ToInt32(row["TeacherCount"]) : 0,
                     IsActive = Convert.ToBoolean(row["IsActive"])

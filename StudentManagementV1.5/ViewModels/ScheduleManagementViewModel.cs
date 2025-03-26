@@ -1,7 +1,9 @@
 using StudentManagementV1._5.Commands;
 using StudentManagementV1._5.Models;
 using StudentManagementV1._5.Services;
+using StudentManagementV1._5.Views;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Threading.Tasks;
@@ -30,103 +32,84 @@ namespace StudentManagementV1._5.ViewModels
         // 2. Binding đến DataGrid hoặc ListView
         // 3. Được tải từ cơ sở dữ liệu và lọc theo các điều kiện
         private ObservableCollection<Schedule> _schedules = new ObservableCollection<Schedule>();
-        
-        // 1. Danh sách lớp học để lọc lịch học
-        // 2. Binding đến ComboBox lọc theo lớp
-        // 3. Được tải từ cơ sở dữ liệu
-        private ObservableCollection<SchoolClass> _classes = new ObservableCollection<SchoolClass>();
-        
-        // 1. Danh sách các ngày trong tuần để lọc
-        // 2. Binding đến ComboBox lọc theo ngày
-        // 3. Danh sách cố định các ngày trong tuần
-        private ObservableCollection<string> _daysOfWeek = new ObservableCollection<string>
-        {
-            "All", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-        };
-
-        // 1. Lớp học được chọn để lọc
-        // 2. Binding đến SelectedItem của ComboBox lớp học
-        // 3. Được sử dụng khi áp dụng bộ lọc
-        private SchoolClass _selectedClass;
-        
-        // 1. Ngày trong tuần được chọn để lọc
-        // 2. Binding đến SelectedItem của ComboBox ngày
-        // 3. Được sử dụng khi áp dụng bộ lọc
-        private string _selectedDay = "All";
-        
-        // 1. Lịch học được chọn trong danh sách
-        // 2. Binding đến SelectedItem của DataGrid/ListView
-        // 3. Dùng cho các thao tác sửa, xóa hoặc hiển thị chi tiết
-        private Schedule _selectedSchedule;
-        
-        // 1. Trạng thái đang tải dữ liệu
-        // 2. Binding đến UI để hiển thị thông báo "Đang tải..."
-        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
-        private bool _isLoading;
-
-        // 1. Danh sách lịch học hiển thị trong UI
-        // 2. Binding đến DataGrid hoặc ListView
-        // 3. Được tải từ cơ sở dữ liệu và lọc theo các điều kiện
         public ObservableCollection<Schedule> Schedules
         {
             get => _schedules;
             set => SetProperty(ref _schedules, value);
         }
-
-        // 1. Danh sách lớp học để lọc lịch học
-        // 2. Binding đến ComboBox lọc theo lớp
-        // 3. Được tải từ cơ sở dữ liệu
+        
+        // 1. Danh sách lớp học để lọc
+        // 2. Binding đến ComboBox lớp học
+        // 3. Bao gồm tùy chọn "Tất cả lớp học" và các lớp học từ cơ sở dữ liệu
+        private ObservableCollection<SchoolClass> _classes = new ObservableCollection<SchoolClass>();
         public ObservableCollection<SchoolClass> Classes
         {
             get => _classes;
             set => SetProperty(ref _classes, value);
         }
-
-        // 1. Danh sách các ngày trong tuần để lọc
-        // 2. Binding đến ComboBox lọc theo ngày
-        // 3. Danh sách cố định các ngày trong tuần
-        public ObservableCollection<string> DaysOfWeek
-        {
-            get => _daysOfWeek;
-            set => SetProperty(ref _daysOfWeek, value);
-        }
-
+        
         // 1. Lớp học được chọn để lọc
-        // 2. Binding đến SelectedItem của ComboBox lớp học
-        // 3. Được sử dụng khi áp dụng bộ lọc
+        // 2. Binding đến ComboBox lớp học
+        // 3. Dùng để lọc lịch học theo lớp
+        private SchoolClass _selectedClass;
         public SchoolClass SelectedClass
         {
             get => _selectedClass;
-            set => SetProperty(ref _selectedClass, value);
+            set
+            {
+                if (SetProperty(ref _selectedClass, value))
+                {
+                    LoadSchedulesAsync();
+                }
+            }
         }
-
+        
+        // 1. Danh sách các ngày trong tuần để lọc
+        // 2. Binding đến ComboBox ngày trong tuần
+        // 3. Bao gồm tùy chọn "Tất cả các ngày" và các ngày trong tuần
+        private ObservableCollection<string> _days = new ObservableCollection<string>();
+        public ObservableCollection<string> Days
+        {
+            get => _days;
+            set => SetProperty(ref _days, value);
+        }
+        
         // 1. Ngày trong tuần được chọn để lọc
-        // 2. Binding đến SelectedItem của ComboBox ngày
-        // 3. Được sử dụng khi áp dụng bộ lọc
+        // 2. Binding đến ComboBox ngày trong tuần
+        // 3. Dùng để lọc lịch học theo ngày
+        private string _selectedDay = "All Days";
         public string SelectedDay
         {
             get => _selectedDay;
-            set => SetProperty(ref _selectedDay, value);
+            set
+            {
+                if (SetProperty(ref _selectedDay, value))
+                {
+                    LoadSchedulesAsync();
+                }
+            }
         }
-
-        // 1. Lịch học được chọn trong danh sách
-        // 2. Binding đến SelectedItem của DataGrid/ListView
-        // 3. Dùng cho các thao tác sửa, xóa hoặc hiển thị chi tiết
-        public Schedule SelectedSchedule
-        {
-            get => _selectedSchedule;
-            set => SetProperty(ref _selectedSchedule, value);
-        }
-
-        // 1. Trạng thái đang tải dữ liệu
-        // 2. Binding đến UI để hiển thị thông báo "Đang tải..."
-        // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
+        
+        // 1. Cờ đánh dấu đang tải dữ liệu
+        // 2. Binding đến overlay loading
+        // 3. Hiển thị hiệu ứng loading khi đang tải dữ liệu
+        private bool _isLoading;
         public bool IsLoading
         {
             get => _isLoading;
             set => SetProperty(ref _isLoading, value);
         }
-
+        
+        // 1. Lịch học được chọn trong danh sách
+        // 2. Binding đến SelectedItem của DataGrid
+        // 3. Được sử dụng cho các thao tác sửa và xóa
+        private Schedule _selectedSchedule;
+        public Schedule SelectedSchedule
+        {
+            get => _selectedSchedule;
+            set => SetProperty(ref _selectedSchedule, value);
+        }
+        
         // 1. Lệnh áp dụng bộ lọc
         // 2. Binding đến nút "Áp dụng" trong UI
         // 3. Khi được gọi, tải lại lịch học với các bộ lọc đã chọn
@@ -151,7 +134,7 @@ namespace StudentManagementV1._5.ViewModels
         // 2. Binding đến nút "Quay lại" trong UI
         // 3. Khi được gọi, chuyển về màn hình dashboard
         public ICommand NavigateBackCommand { get; }
-
+        
         // 1. Constructor của lớp
         // 2. Khởi tạo các tham số và thiết lập lệnh
         // 3. Tải dữ liệu ban đầu từ cơ sở dữ liệu
@@ -164,12 +147,33 @@ namespace StudentManagementV1._5.ViewModels
             ApplyFiltersCommand = new RelayCommand(param => LoadSchedulesAsync());
             AddScheduleCommand = new RelayCommand(param => AddSchedule());
             EditScheduleCommand = new RelayCommand(param => EditSchedule(param as Schedule), param => param != null);
-            DeleteScheduleCommand = new RelayCommand(param => DeleteSchedule(param as Schedule), param => param != null);
+            DeleteScheduleCommand = new RelayCommand(async param => await DeleteScheduleAsync(param as Schedule), param => param != null);
             NavigateBackCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.AdminDashboard));
+
+            // Initialize days of week filter
+            InitializeDaysFilter();
 
             // Load initial data
             LoadClassesAsync();
             LoadSchedulesAsync();
+        }
+        
+        // 1. Phương thức khởi tạo bộ lọc ngày trong tuần
+        // 2. Thêm tùy chọn "Tất cả các ngày" và các ngày trong tuần
+        // 3. Thiết lập lựa chọn mặc định là "Tất cả các ngày"
+        private void InitializeDaysFilter()
+        {
+            Days.Clear();
+            Days.Add("All Days");
+            Days.Add("Monday");
+            Days.Add("Tuesday");
+            Days.Add("Wednesday");
+            Days.Add("Thursday");
+            Days.Add("Friday");
+            Days.Add("Saturday");
+            Days.Add("Sunday");
+            
+            SelectedDay = Days[0]; // Default to "All Days"
         }
 
         // 1. Phương thức tải danh sách lớp học
@@ -238,28 +242,22 @@ namespace StudentManagementV1._5.ViewModels
 
                 var parameters = new Dictionary<string, object>();
 
-                if (SelectedClass != null && SelectedClass.ClassID != 0)
+                // Apply class filter
+                if (SelectedClass != null && SelectedClass.ClassID > 0)
                 {
                     query += " AND cs.ClassID = @ClassID";
-                    parameters["@ClassID"] = SelectedClass.ClassID;
+                    parameters.Add("@ClassID", SelectedClass.ClassID);
                 }
 
-                if (SelectedDay != "All")
+                // Apply day filter
+                if (SelectedDay != "All Days")
                 {
                     query += " AND cs.DayOfWeek = @DayOfWeek";
-                    parameters["@DayOfWeek"] = SelectedDay;
+                    parameters.Add("@DayOfWeek", SelectedDay);
                 }
 
-                query += @"
-                    ORDER BY CASE cs.DayOfWeek
-                        WHEN 'Monday' THEN 1
-                        WHEN 'Tuesday' THEN 2
-                        WHEN 'Wednesday' THEN 3
-                        WHEN 'Thursday' THEN 4
-                        WHEN 'Friday' THEN 5
-                        WHEN 'Saturday' THEN 6
-                        WHEN 'Sunday' THEN 7 END,
-                    cs.StartTime";
+                // Order by
+                query += " ORDER BY c.ClassName, cs.DayOfWeek, cs.StartTime";
 
                 DataTable result = await _databaseService.ExecuteQueryAsync(query, parameters);
 
@@ -292,29 +290,45 @@ namespace StudentManagementV1._5.ViewModels
         }
 
         // 1. Phương thức thêm lịch học mới
-        // 2. Hiển thị thông báo chức năng sẽ được triển khai trong tương lai
-        // 3. Đặt chỗ cho chức năng thêm lịch học thực sự
+        // 2. Mở dialog thêm lịch học và xử lý kết quả
+        // 3. Nếu lưu thành công, tải lại danh sách lịch học
         private void AddSchedule()
         {
-            MessageBox.Show("Add Schedule functionality will be implemented soon.", 
-                "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
+            var dialogWindow = new AddEditScheduleView();
+            var viewModel = new AddEditScheduleViewModel(_databaseService, dialogWindow);
+            dialogWindow.DataContext = viewModel;
+            dialogWindow.Owner = Application.Current.MainWindow;
+            
+            bool? result = dialogWindow.ShowDialog();
+            if (result == true)
+            {
+                LoadSchedulesAsync();
+            }
         }
 
         // 1. Phương thức chỉnh sửa lịch học
-        // 2. Hiển thị thông báo chức năng sẽ được triển khai trong tương lai
-        // 3. Đặt chỗ cho chức năng sửa lịch học thực sự
+        // 2. Mở dialog chỉnh sửa lịch học với dữ liệu đã chọn
+        // 3. Nếu lưu thành công, tải lại danh sách lịch học
         private void EditSchedule(Schedule schedule)
         {
             if (schedule == null) return;
             
-            MessageBox.Show($"Edit Schedule functionality for {schedule.ClassName} - {schedule.SubjectName} will be implemented soon.", 
-                "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
+            var dialogWindow = new AddEditScheduleView();
+            var viewModel = new AddEditScheduleViewModel(_databaseService, dialogWindow, schedule);
+            dialogWindow.DataContext = viewModel;
+            dialogWindow.Owner = Application.Current.MainWindow;
+            
+            bool? result = dialogWindow.ShowDialog();
+            if (result == true)
+            {
+                LoadSchedulesAsync();
+            }
         }
 
         // 1. Phương thức xóa lịch học
-        // 2. Hiển thị xác nhận xóa và thông báo chức năng sẽ được triển khai trong tương lai
-        // 3. Đặt chỗ cho chức năng xóa lịch học thực sự
-        private void DeleteSchedule(Schedule schedule)
+        // 2. Hiển thị xác nhận xóa và thực hiện xóa nếu được xác nhận
+        // 3. Tải lại danh sách lịch học sau khi xóa thành công
+        private async Task DeleteScheduleAsync(Schedule schedule)
         {
             if (schedule == null) return;
             
@@ -327,20 +341,24 @@ namespace StudentManagementV1._5.ViewModels
                 {
                     IsLoading = true;
                     
-                    // For now, just show a message - we'll implement the actual deletion in a future update
-                    MessageBox.Show("Delete Schedule functionality will be implemented soon.", 
-                        "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
-                        
-                    // In a real implementation, we would delete from the database and refresh the list
-                    // Sample code (commented out):
-                    // string query = $"DELETE FROM ClassSchedules WHERE ScheduleID = {schedule.ScheduleID}";
-                    // await _databaseService.ExecuteNonQueryAsync(query);
-                    // LoadSchedulesAsync();
+                    string query = "DELETE FROM ClassSchedules WHERE ScheduleID = @ScheduleID";
+                    var parameters = new Dictionary<string, object>
+                    {
+                        { "@ScheduleID", schedule.ScheduleID }
+                    };
+                    
+                    await _databaseService.ExecuteNonQueryAsync(query, parameters);
+                    
+                    // Reload schedules after deletion
+                    LoadSchedulesAsync();
+                    
+                    MessageBox.Show("Schedule deleted successfully.", "Success", 
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error deleting schedule: {ex.Message}", 
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Error deleting schedule: {ex.Message}", "Error", 
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 finally
                 {

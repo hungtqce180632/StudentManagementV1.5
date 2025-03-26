@@ -3,65 +3,75 @@ using System;
 namespace StudentManagementV1._5.Models
 {
     // Lớp Schedule
-    // + Tại sao cần sử dụng: Lưu trữ thông tin lịch học và lịch giảng dạy
-    // + Lớp này liên kết với Class, Subject và Teacher để tạo thành thời khóa biểu
-    // + Chức năng chính: Quản lý thời gian, địa điểm và người tham gia các buổi học
+    // + Tại sao cần sử dụng: Lưu trữ thông tin lịch học trong hệ thống
+    // + Lớp này ánh xạ với bảng ClassSchedules trong cơ sở dữ liệu
+    // + Chức năng chính: Quản lý thông tin chi tiết về lịch học các môn
     public class Schedule
     {
-        // 1. Khóa chính của bảng Schedule
-        // 2. Đại diện cho một mục trong thời khóa biểu
+        // 1. Khóa chính của bảng ClassSchedules
+        // 2. Được sử dụng để xác định duy nhất một lịch học
         // 3. Tự động tạo khi thêm mới lịch học
         public int ScheduleID { get; set; }
         
-        // 1. Khóa ngoại liên kết với bảng Class
-        // 2. Xác định lớp học tham gia buổi học này
-        // 3. Mỗi lịch học thuộc về một lớp cụ thể
+        // 1. Khóa ngoại tham chiếu đến bảng Classes
+        // 2. Xác định lớp học có lịch này
+        // 3. Bắt buộc phải có giá trị
         public int ClassID { get; set; }
         
-        // 1. Tên lớp học tham gia buổi học
-        // 2. Được lưu trực tiếp để tiện hiển thị mà không cần truy vấn thêm
-        // 3. Thường được lấy từ bảng Class khi tạo lịch
+        // 1. Tên lớp học để hiển thị
+        // 2. Lấy từ bảng Classes
+        // 3. Giúp người dùng dễ nhận biết lớp học
         public string ClassName { get; set; } = string.Empty;
         
-        // 1. Khóa ngoại liên kết với bảng Subject
-        // 2. Xác định môn học được giảng dạy trong buổi học
-        // 3. Mỗi lịch học dành cho một môn học cụ thể
+        // 1. Khóa ngoại tham chiếu đến bảng Subjects
+        // 2. Xác định môn học được dạy trong lịch này
+        // 3. Bắt buộc phải có giá trị
         public int SubjectID { get; set; }
         
-        // 1. Tên môn học được giảng dạy
-        // 2. Được lưu trực tiếp để tiện hiển thị mà không cần truy vấn thêm
-        // 3. Thường được lấy từ bảng Subject khi tạo lịch
+        // 1. Tên môn học để hiển thị
+        // 2. Lấy từ bảng Subjects
+        // 3. Giúp người dùng dễ nhận biết môn học
         public string SubjectName { get; set; } = string.Empty;
         
-        // 1. Khóa ngoại liên kết với bảng Teacher
-        // 2. Xác định giáo viên giảng dạy buổi học
-        // 3. Mỗi lịch học có một giáo viên phụ trách
+        // 1. Khóa ngoại tham chiếu đến bảng Teachers
+        // 2. Xác định giáo viên giảng dạy trong lịch này
+        // 3. Bắt buộc phải có giá trị
         public int TeacherID { get; set; }
         
-        // 1. Tên giáo viên giảng dạy
-        // 2. Được lưu trực tiếp để tiện hiển thị mà không cần truy vấn thêm
-        // 3. Thường được lấy từ bảng Teacher khi tạo lịch
+        // 1. Tên giáo viên để hiển thị
+        // 2. Lấy từ bảng Teachers (FirstName + LastName)
+        // 3. Giúp người dùng dễ nhận biết giáo viên
         public string TeacherName { get; set; } = string.Empty;
         
-        // 1. Thứ trong tuần của buổi học
-        // 2. Ví dụ: "Thứ Hai", "Thứ Ba", v.v.
-        // 3. Là một phần của thông tin thời gian học
+        // 1. Ngày trong tuần của lịch học
+        // 2. Ví dụ: "Monday", "Tuesday", ...
+        // 3. Bắt buộc phải có giá trị
         public string DayOfWeek { get; set; } = string.Empty;
         
-        // 1. Thời gian bắt đầu buổi học
-        // 2. Lưu dưới dạng TimeSpan (giờ:phút:giây)
-        // 3. Kết hợp với DayOfWeek để xác định thời điểm học
+        // 1. Thời gian bắt đầu của tiết học
+        // 2. Định dạng: TimeSpan lưu giờ và phút
+        // 3. Bắt buộc phải có giá trị
         public TimeSpan StartTime { get; set; }
         
-        // 1. Thời gian kết thúc buổi học
-        // 2. Lưu dưới dạng TimeSpan (giờ:phút:giây)
-        // 3. Được sử dụng để tính thời lượng và kiểm tra trùng lịch
+        // 1. Thời gian kết thúc của tiết học
+        // 2. Phải lớn hơn StartTime
+        // 3. Bắt buộc phải có giá trị
         public TimeSpan EndTime { get; set; }
         
-        // 1. Phòng học hoặc địa điểm diễn ra buổi học
-        // 2. Có thể là số phòng, tên phòng hoặc địa điểm cụ thể
-        // 3. Giúp học sinh và giáo viên biết nơi diễn ra buổi học
+        // 1. Phòng học diễn ra tiết học
+        // 2. Có thể là phòng học thường, phòng thí nghiệm, ...
+        // 3. Bắt buộc phải có giá trị
         public string Room { get; set; } = string.Empty;
+        
+        // 1. Thuộc tính phụ trợ để hiển thị thời gian dạy
+        // 2. Kết hợp StartTime và EndTime thành chuỗi dễ đọc
+        // 3. Ví dụ: "08:00 - 09:30"
+        public string TimeDisplay => $"{StartTime.ToString(@"hh\:mm")} - {EndTime.ToString(@"hh\:mm")}";
+        
+        // 1. Thuộc tính phụ trợ để hiển thị thông tin đầy đủ
+        // 2. Kết hợp tên môn học, giáo viên, thời gian, phòng học
+        // 3. Dùng cho hiển thị chi tiết
+        public string FullInfo => $"{SubjectName} ({TeacherName}) - {DayOfWeek} {TimeDisplay} - Room: {Room}";
     }
 
     // Lớp SchoolClass

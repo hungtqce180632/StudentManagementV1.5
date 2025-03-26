@@ -66,5 +66,25 @@ namespace StudentManagementV1._5.Models
         public string LastLoginDisplay => LastLoginDate.HasValue ? 
             LastLoginDate.Value.ToString("yyyy-MM-dd HH:mm") : 
             "Never";
+
+        // 1. Mảng byte lưu trữ hàm băm mật khẩu
+        // 2. Dùng để xác thực khi đăng nhập
+        // 3. Không bao giờ lưu trữ mật khẩu thô
+        public byte[] PasswordHash { get; set; }
+        
+        // 1. Mảng byte lưu trữ salt cho mật khẩu
+        // 2. Dùng để tăng cường bảo mật cho hàm băm mật khẩu
+        // 3. Được tạo ngẫu nhiên khi đặt mật khẩu
+        public byte[] PasswordSalt { get; set; }
+        
+        // 1. Thuộc tính tạm thời để lưu mật khẩu khi tạo mới hoặc đổi mật khẩu
+        // 2. Không được lưu vào cơ sở dữ liệu
+        // 3. Chỉ dùng trong quá trình tạo hoặc cập nhật
+        public string Password { get; set; } = string.Empty;
+        
+        // 1. Thuộc tính tạm thời để xác nhận mật khẩu
+        // 2. Dùng để kiểm tra khớp với Password khi đăng ký hoặc đổi mật khẩu
+        // 3. Không được lưu vào cơ sở dữ liệu
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }
