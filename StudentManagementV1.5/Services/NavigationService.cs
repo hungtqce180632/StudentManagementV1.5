@@ -47,7 +47,9 @@ namespace StudentManagementV1._5.Services
         // 3. Chỉ Học sinh mới có quyền truy cập
         // Student views
         SubmissionManagement,
-        ViewAssignments
+        ViewAssignments,
+
+        MySubjects
     }
 
     // Lớp NavigationService

@@ -22,7 +22,7 @@ namespace StudentManagementV1._5.ViewModels
         // 2. Được truyền vào từ constructor
         // 3. Dùng để tải và thao tác với dữ liệu môn học
         private readonly DatabaseService _databaseService;
-        
+
         // 1. Dịch vụ điều hướng
         // 2. Được truyền vào từ constructor
         // 3. Dùng để chuyển đổi giữa các màn hình
@@ -31,23 +31,23 @@ namespace StudentManagementV1._5.ViewModels
         // 1. Danh sách môn học hiển thị trong UI
         // 2. Binding đến DataGrid hoặc ListView
         // 3. Được tải từ cơ sở dữ liệu và lọc theo các điều kiện
-        private ObservableCollection<Subject> _subjects = [];
-        
+        private ObservableCollection<Subject> _subjects = new ObservableCollection<Subject>();
+
         // 1. Từ khóa tìm kiếm
         // 2. Binding đến TextBox tìm kiếm
         // 3. Dùng để lọc môn học theo tên hoặc mô tả
         private string _searchText = string.Empty;
-        
+
         // 1. Tùy chọn hiển thị môn học không hoạt động
         // 2. Binding đến CheckBox trong UI
         // 3. Khi thay đổi sẽ lọc danh sách môn học
         private bool _showInactiveSubjects = false;
-        
+
         // 1. Trạng thái đang tải dữ liệu
         // 2. Binding đến indicator trong UI
         // 3. Cập nhật khi bắt đầu và kết thúc tải dữ liệu
         private bool _isLoading;
-        
+
         // 1. Môn học được chọn trong danh sách
         // 2. Binding đến SelectedItem của DataGrid/ListView
         // 3. Dùng cho các thao tác sửa, xóa hoặc hiển thị chi tiết
@@ -114,17 +114,17 @@ namespace StudentManagementV1._5.ViewModels
         // 2. Binding đến nút "Thêm môn học" trong UI
         // 3. Khi được gọi, mở hộp thoại thêm môn học
         public ICommand AddSubjectCommand { get; }
-        
+
         // 1. Lệnh sửa môn học
         // 2. Binding đến nút "Sửa" trong UI
         // 3. Khi được gọi, mở hộp thoại sửa môn học với thông tin đã chọn
         public ICommand EditSubjectCommand { get; }
-        
+
         // 1. Lệnh xóa môn học
         // 2. Binding đến nút "Xóa" trong UI
         // 3. Khi được gọi, hiển thị xác nhận và xóa môn học đã chọn
         public ICommand DeleteSubjectCommand { get; }
-        
+
         // 1. Lệnh quay lại
         // 2. Binding đến nút "Quay lại" trong UI
         // 3. Khi được gọi, chuyển về màn hình dashboard
@@ -142,11 +142,11 @@ namespace StudentManagementV1._5.ViewModels
             EditSubjectCommand = new RelayCommand(param => EditSubject(param as Subject), param => param != null);
             DeleteSubjectCommand = new RelayCommand(async param => await DeleteSubjectAsync(param as Subject), param => param != null);
             BackCommand = new RelayCommand(_ => _navigationService.NavigateTo(AppViews.AdminDashboard));
-            
+
             // Load subjects when ViewModel is created
             _ = LoadSubjectsAsync();
         }
-        
+
         // 1. Phương thức làm mới danh sách môn học
         // 2. Gọi khi có thay đổi tìm kiếm hoặc bộ lọc
         // 3. Tải lại dữ liệu từ cơ sở dữ liệu
@@ -154,7 +154,7 @@ namespace StudentManagementV1._5.ViewModels
         {
             await LoadSubjectsAsync();
         }
-        
+
         // 1. Phương thức tải danh sách môn học
         // 2. Truy vấn cơ sở dữ liệu với các điều kiện lọc
         // 3. Cập nhật danh sách Subjects với kết quả tìm kiếm
@@ -168,7 +168,7 @@ namespace StudentManagementV1._5.ViewModels
                 string query = BuildSubjectQuery();
                 var parameters = BuildQueryParameters();
                 DataTable result = await _databaseService.ExecuteQueryAsync(query, parameters);
-                
+
                 PopulateSubjectsFromDataTable(result);
             }
             catch (Exception ex)
@@ -181,7 +181,7 @@ namespace StudentManagementV1._5.ViewModels
                 IsLoading = false;
             }
         }
-        
+
         // 1. Phương thức xây dựng câu truy vấn SQL
         // 2. Tạo câu truy vấn dựa trên điều kiện tìm kiếm và bộ lọc
         // 3. Trả về chuỗi truy vấn SQL hoàn chỉnh
@@ -198,7 +198,7 @@ namespace StudentManagementV1._5.ViewModels
                     (SELECT COUNT(DISTINCT TeacherID) FROM TeacherSubjects WHERE SubjectID = s.SubjectID) AS TeacherCount
                 FROM Subjects s
                 WHERE 1=1";
-            
+
             if (!_showInactiveSubjects)
             {
                 query += " AND s.IsActive = 1";
@@ -210,25 +210,25 @@ namespace StudentManagementV1._5.ViewModels
             }
 
             query += " ORDER BY s.SubjectName";
-            
+
             return query;
         }
-        
+
         // 1. Phương thức tạo tham số cho truy vấn
         // 2. Tạo dictionary chứa các tham số truy vấn
         // 3. Trả về dictionary với tham số tìm kiếm (nếu có)
         private Dictionary<string, object> BuildQueryParameters()
         {
             var parameters = new Dictionary<string, object>();
-            
+
             if (!string.IsNullOrWhiteSpace(_searchText))
             {
                 parameters["@Search"] = $"%{_searchText}%";
             }
-            
+
             return parameters;
         }
-        
+
         // 1. Phương thức điền dữ liệu từ DataTable vào danh sách Subjects
         // 2. Chuyển đổi từng dòng dữ liệu thành đối tượng Subject
         // 3. Thêm đối tượng Subject vào danh sách Subjects
@@ -248,48 +248,58 @@ namespace StudentManagementV1._5.ViewModels
                 });
             }
         }
-        
+
         // 1. Phương thức thêm môn học mới
-        // 2. Hiển thị thông báo chức năng sẽ được triển khai trong tương lai
-        // 3. Sẽ mở hộp thoại thực sự trong triển khai tương lai
+        // 2. Mở hộp thoại AddSubjectView để thêm môn học
         private void AddSubject()
         {
-            // For now just show a placeholder message
-            // In a future update, implement an Add Subject dialog similar to Class Management
-            MessageBox.Show("Add Subject functionality will be implemented in a future update.", 
-                "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
+            var dialog = new AddEditSubjectView();
+            dialog.DataContext = new AddEditSubjectViewModel(_databaseService, dialog);
+            dialog.Owner = Application.Current.MainWindow;
+
+            if (dialog.ShowDialog() == true)
+            {
+                // Refresh the subject list after adding
+                _ = RefreshSubjectsAsync();
+            }
         }
-        
+
         // 1. Phương thức sửa môn học
         // 2. Hiển thị thông báo chức năng sẽ được triển khai trong tương lai
         // 3. Sẽ mở hộp thoại sửa với thông tin môn học đã chọn trong triển khai tương lai
         private void EditSubject(Subject? subject)
         {
             if (subject == null) return;
-            
-            // For now just show a placeholder message
-            // In a future update, implement an Edit Subject dialog similar to Class Management
-            MessageBox.Show($"Edit Subject '{subject.SubjectName}' functionality will be implemented in a future update.", 
-                "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            var dialog = new AddEditSubjectView();
+            var viewModel = new AddEditSubjectViewModel(_databaseService, dialog, subject);
+            dialog.DataContext = viewModel;
+            dialog.Owner = Application.Current.MainWindow;
+
+            if (dialog.ShowDialog() == true)
+            {
+                // Refresh the subject list after editing
+                _ = RefreshSubjectsAsync();
+            }
         }
-        
+
         // 1. Phương thức xóa môn học
         // 2. Hiển thị hộp thoại xác nhận trước khi xóa
         // 3. Nếu xác nhận, gọi phương thức hủy kích hoạt môn học
         private async Task DeleteSubjectAsync(Subject? subject)
         {
             if (subject == null) return;
-            
+
             // Confirm deletion
-            var result = MessageBox.Show($"Are you sure you want to deactivate subject '{subject.SubjectName}'?", 
+            var result = MessageBox.Show($"Are you sure you want to deactivate subject '{subject.SubjectName}'?",
                 "Confirm Deactivate", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            
+
             if (result == MessageBoxResult.Yes)
             {
                 await DeactivateSubjectAsync(subject);
             }
         }
-        
+
         // 1. Phương thức hủy kích hoạt môn học
         // 2. Kiểm tra xem môn học có đang được sử dụng không và cập nhật trạng thái
         // 3. Nếu thành công, làm mới danh sách môn học
@@ -298,7 +308,7 @@ namespace StudentManagementV1._5.ViewModels
             try
             {
                 IsLoading = true;
-                
+
                 // Check if subject is in use
                 if (subject.ClassCount > 0 || subject.TeacherCount > 0)
                 {
@@ -307,20 +317,20 @@ namespace StudentManagementV1._5.ViewModels
                         "Operation Not Allowed", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                
+
                 // Instead of deleting, set IsActive = 0
                 string query = "UPDATE Subjects SET IsActive = 0 WHERE SubjectID = @SubjectID";
                 var parameters = new Dictionary<string, object>
                 {
                     { "@SubjectID", subject.SubjectID }
                 };
-                
+
                 await _databaseService.ExecuteNonQueryAsync(query, parameters);
-                
+
                 // Refresh the list
                 await LoadSubjectsAsync();
 
-                MessageBox.Show($"Subject '{subject.SubjectName}' has been deactivated.", 
+                MessageBox.Show($"Subject '{subject.SubjectName}' has been deactivated.",
                     "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)

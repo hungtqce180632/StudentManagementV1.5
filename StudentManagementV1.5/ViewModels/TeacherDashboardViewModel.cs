@@ -35,9 +35,13 @@ namespace StudentManagementV1._5.ViewModels
             set => SetProperty(ref _welcomeMessage, value);
         }
 
+
         // 1. Lệnh đăng xuất
         // 2. Binding đến nút "Đăng xuất" trong UI
         // 3. Khi được gọi, đăng xuất và chuyển về màn hình đăng nhập
+
+        public ICommand SubjectsCommand { get; }
+
         public ICommand LogoutCommand { get; }
         
         // 1. Lệnh điều hướng đến màn hình quản lý bài tập
@@ -56,6 +60,7 @@ namespace StudentManagementV1._5.ViewModels
             WelcomeMessage = $"Welcome, {_authService.CurrentUser?.Username ?? "Teacher"}!";
 
             LogoutCommand = new RelayCommand(param => Logout());
+            
             NavigateToAssignmentManagementCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.AssignmentManagement));
         }
 
@@ -67,5 +72,6 @@ namespace StudentManagementV1._5.ViewModels
             _authService.Logout();
             _navigationService.NavigateTo(AppViews.Login);
         }
+
     }
 }

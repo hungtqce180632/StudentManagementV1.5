@@ -52,6 +52,7 @@
                         IsEnabled="False"/>
                 
                 <Button Content="My Subjects" 
+                         Command="{Binding SubjectsCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
                 
@@ -113,7 +114,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#4CAF50">
                         <StackPanel>
                             <TextBlock Text="Classes" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="0" Style="{StaticResource StatValue}" Height="40"/>
                             <TextBlock Text="Assigned Classes" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -122,7 +123,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#2196F3">
                         <StackPanel>
                             <TextBlock Text="Students" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="0" Style="{StaticResource StatValue}" Height="39"/>
                             <TextBlock Text="Total Students" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -131,7 +132,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#FF9800">
                         <StackPanel>
                             <TextBlock Text="Assignments" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="0" Style="{StaticResource StatValue}" Height="39"/>
                             <TextBlock Text="Current Assignments" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -140,8 +141,8 @@
                     <Border Style="{StaticResource StatCard}" Background="#9C27B0">
                         <StackPanel>
                             <TextBlock Text="Submissions" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}"/>
-                            <TextBlock Text="Pending Reviews" Style="{StaticResource StatDesc}"/>
+                            <TextBlock Text="0" Style="{StaticResource StatValue}" Height="40"/>
+                            <TextBlock Text="Pending Reviews" Style="{StaticResource StatDesc}" Height="20" RenderTransformOrigin="0.5,1.145"/>
                         </StackPanel>
                     </Border>
                 </WrapPanel>

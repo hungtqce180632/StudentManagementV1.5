@@ -169,7 +169,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             AppViews.SubjectManagement => new SubjectManagementView { DataContext = new SubjectManagementViewModel(_databaseService, _navigationService) },
             AppViews.NotificationManagement => new NotificationManagementView { DataContext = new NotificationManagementViewModel(_databaseService, _authService, _navigationService) },
             AppViews.ExamManagement => new ExamManagementView { DataContext = new ExamManagementViewModel(_databaseService, _navigationService) },
-            
+
             // Add the rest of the views as you implement them
             _ => throw new System.NotImplementedException($"View {view} is not implemented")
         };

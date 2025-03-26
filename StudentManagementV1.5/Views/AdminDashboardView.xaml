@@ -127,7 +127,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#4CAF50">
                         <StackPanel>
                             <TextBlock Text="Students" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="{Binding StudentCount}" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="{Binding StudentCount}" Style="{StaticResource StatValue}" Height="38"/>
                             <TextBlock Text="Total Students" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -136,7 +136,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#2196F3">
                         <StackPanel>
                             <TextBlock Text="Teachers" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="{Binding TeacherCount}" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="{Binding TeacherCount}" Style="{StaticResource StatValue}" Height="40"/>
                             <TextBlock Text="Total Teachers" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -145,7 +145,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#FF9800">
                         <StackPanel>
                             <TextBlock Text="Classes" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="{Binding ClassCount}" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="{Binding ClassCount}" Style="{StaticResource StatValue}" Height="38"/>
                             <TextBlock Text="Active Classes" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -154,7 +154,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#9C27B0">
                         <StackPanel>
                             <TextBlock Text="Subjects" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="{Binding SubjectCount}" Style="{StaticResource StatValue}"/>
+                            <TextBlock Text="{Binding SubjectCount}" Style="{StaticResource StatValue}" Height="41"/>
                             <TextBlock Text="Total Subjects" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
