@@ -19,9 +19,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:StudentManagementV1._5"
              xmlns:converters="clr-namespace:StudentManagementV1._5.Converters"
-             Startup="Application_Startup">
+             StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Add our converter resource dictionary -->
+                <ResourceDictionary Source="/ResourceDictionaries/ConverterResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
             <!-- Các Converter toàn cục -->
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -29,6 +33,7 @@
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
             <converters:BoolToActiveStatusConverter x:Key="BoolToActiveStatusConverter"/>
             <converters:BoolToStatusColorConverter x:Key="BoolToStatusColorConverter"/>
+            <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
 
             <!-- Style cho các nút điều hướng trong dashboard -->
             <Style x:Key="NavButton" TargetType="Button">
@@ -37,22 +42,33 @@
                 <Setter Property="FontSize" Value="14"/>
                 <Setter Property="FontWeight" Value="Medium"/>
                 <Setter Property="Height" Value="40"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="15,10"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
                             <Border Background="{TemplateBinding Background}" 
-                                    BorderThickness="0" 
-                                    CornerRadius="5" 
-                                    Padding="10,0">
-                                <ContentPresenter HorizontalAlignment="Left" 
-                                                  VerticalAlignment="Center"/>
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}"
+                                    CornerRadius="5">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                             </Border>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="#1976D2"/>
+                        <Setter Property="Background" Value="#388E3C"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter Property="Background" Value="#1B5E20"/>
+                    </Trigger>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Background" Value="#43A047"/>
+                        <Setter Property="Opacity" Value="0.7"/>
                     </Trigger>
                 </Style.Triggers>
             </Style>
@@ -61,7 +77,7 @@
             <Style x:Key="StatCard" TargetType="Border">
                 <Setter Property="Width" Value="200"/>
                 <Setter Property="Height" Value="120"/>
-                <Setter Property="Margin" Value="0,0,20,0"/>
+                <Setter Property="Margin" Value="0,0,15,0"/>
                 <Setter Property="CornerRadius" Value="5"/>
                 <Setter Property="Padding" Value="15"/>
             </Style>
@@ -71,14 +87,15 @@
                 <Setter Property="Foreground" Value="White"/>
                 <Setter Property="FontSize" Value="14"/>
                 <Setter Property="FontWeight" Value="Medium"/>
+                <Setter Property="Opacity" Value="0.8"/>
             </Style>
 
             <!-- Style cho giá trị của thẻ thống kê -->
             <Style x:Key="StatValue" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="White"/>
-                <Setter Property="FontSize" Value="36"/>
+                <Setter Property="FontSize" Value="32"/>
                 <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="Margin" Value="0,10,0,5"/>
+                <Setter Property="Margin" Value="0,5"/>
             </Style>
 
             <!-- Style cho mô tả của thẻ thống kê -->

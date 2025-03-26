@@ -98,8 +98,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _authService = new AuthenticationService(_databaseService);
         _emailService = new EmailService();
         
-        // Setup navigation
-        _navigationService = new Services.NavigationService(MainFrame, ResolveView);
+        // Setup navigation with parameter support
+        _navigationService = new Services.NavigationService(MainFrame, ResolveView, ResolveViewWithParameter);
         
         // Setup login view
         _loginViewModel = new LoginViewModel(_authService, _navigationService);
@@ -188,6 +188,24 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             // Add the rest of the views as you implement them
             default:
                 throw new NotImplementedException($"View {view} is not implemented");
+        }
+    }
+
+    // 1. Phương thức phân giải các view từ enum AppViews có truyền tham số
+    // 2. Tạo instance của view tương ứng với DataContext phù hợp và truyền tham số
+    // 3. Được gọi bởi NavigationService khi cần chuyển đổi view có tham số
+    private UserControl ResolveViewWithParameter(AppViews view, object parameter)
+    {
+        switch (view)
+        {
+            case AppViews.SubmissionManagement:
+                return new SubmissionManagementView { DataContext = new SubmissionManagementViewModel(_databaseService, _navigationService, _authService) };
+            
+            // Add other views that need parameters here
+            
+            default:
+                // Fall back to regular view resolution
+                return ResolveView(view);
         }
     }
 

@@ -1,0 +1,10 @@
+-- The Status column already exists in the Assignments table, so this script is not needed.
+-- You can delete or rename this file to prevent it from being accidentally executed.
+-- 
+-- Original script:
+-- IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[Assignments]') AND name = 'Status')
+-- BEGIN
+--     ALTER TABLE [dbo].[Assignments]
+--     ADD [Status] [nvarchar](20) NOT NULL DEFAULT 'Published'
+-- END
+-- GO

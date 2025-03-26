@@ -1,0 +1,192 @@
+<!-- filepath: c:\Users\truon\Desktop\New folder (17)\StudentManagementV1.5\StudentManagementV1.5\Views\AssignmentDialogView.xaml -->
+<!-- 
+    View AssignmentDialogView
+    
+    Tại sao sử dụng:
+    - Hiển thị form nhập liệu cho việc tạo mới và chỉnh sửa bài tập
+    - Cung cấp giao diện để nhập thông tin chi tiết về bài tập
+    
+    Quan hệ với các lớp khác:
+    - Data Context: AssignmentDialogViewModel
+    - Được mở từ: AssignmentManagementViewModel
+    
+    Chức năng chính:
+    - Cho phép nhập tiêu đề, mô tả, ngày hết hạn, điểm tối đa của bài tập
+    - Cho phép chọn môn học và lớp học để gán bài tập
+    - Xác thực dữ liệu nhập vào và hiển thị thông báo lỗi
+ -->
+<Window x:Class="StudentManagementV1._5.Views.AssignmentDialogView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StudentManagementV1._5.Views"
+        mc:Ignorable="d"
+        Title="{Binding DialogTitle}"
+        Height="600" Width="700"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="{Binding DialogTitle}" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,10,0">
+                <!-- Title -->
+                <StackPanel Margin="0,0,0,15">
+                    <TextBlock Text="Title" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding Assignment.Title, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,0">
+                        <TextBox.Padding>
+                            <Thickness Left="5" Top="8" Right="5" Bottom="8"/>
+                        </TextBox.Padding>
+                    </TextBox>
+                    <TextBlock Text="{Binding TitleError}" Foreground="Red" FontSize="12" 
+                               Visibility="{Binding HasTitleError, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                </StackPanel>
+
+                <!-- Description -->
+                <StackPanel Margin="0,0,0,15">
+                    <TextBlock Text="Description" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding Assignment.Description, UpdateSourceTrigger=PropertyChanged}" 
+                             AcceptsReturn="True" TextWrapping="Wrap" Height="100" 
+                             VerticalScrollBarVisibility="Auto" Margin="0,5,0,0">
+                        <TextBox.Padding>
+                            <Thickness Left="5" Top="8" Right="5" Bottom="8"/>
+                        </TextBox.Padding>
+                    </TextBox>
+                </StackPanel>
+
+                <!-- Subject and Class Selection -->
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Subject -->
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <TextBlock Text="Subject" FontWeight="SemiBold"/>
+                        <ComboBox ItemsSource="{Binding AvailableSubjects}" 
+                                  SelectedItem="{Binding SelectedSubject}" 
+                                  DisplayMemberPath="SubjectName" 
+                                  Margin="0,5,0,0">
+                            <ComboBox.Padding>
+                                <Thickness Left="5" Top="8" Right="5" Bottom="8"/>
+                            </ComboBox.Padding>
+                        </ComboBox>
+                        <TextBlock Text="{Binding SubjectError}" Foreground="Red" FontSize="12" 
+                                   Visibility="{Binding HasSubjectError, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    </StackPanel>
+
+                    <!-- Class -->
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Text="Class" FontWeight="SemiBold"/>
+                        <ComboBox ItemsSource="{Binding AvailableClasses}" 
+                                  SelectedItem="{Binding SelectedClass}" 
+                                  DisplayMemberPath="ClassName" 
+                                  Margin="0,5,0,0">
+                            <ComboBox.Padding>
+                                <Thickness Left="5" Top="8" Right="5" Bottom="8"/>
+                            </ComboBox.Padding>
+                        </ComboBox>
+                        <TextBlock Text="{Binding ClassError}" Foreground="Red" FontSize="12" 
+                                   Visibility="{Binding HasClassError, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Due Date and Max Points -->
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Due Date -->
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <TextBlock Text="Due Date" FontWeight="SemiBold"/>
+                        <DatePicker SelectedDate="{Binding Assignment.DueDate, UpdateSourceTrigger=PropertyChanged}" 
+                                    Margin="0,5,0,0"/>
+                        <TextBlock Text="{Binding DueDateError}" Foreground="Red" FontSize="12" 
+                                   Visibility="{Binding HasDueDateError, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    </StackPanel>
+
+                    <!-- Max Points -->
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Text="Maximum Points" FontWeight="SemiBold"/>
+                        <TextBox Text="{Binding Assignment.MaxPoints, UpdateSourceTrigger=PropertyChanged}" 
+                                 Margin="0,5,0,0">
+                            <TextBox.Padding>
+                                <Thickness Left="5" Top="8" Right="5" Bottom="8"/>
+                            </TextBox.Padding>
+                        </TextBox>
+                        <TextBlock Text="{Binding MaxPointsError}" Foreground="Red" FontSize="12" 
+                                   Visibility="{Binding HasMaxPointsError, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Status -->
+                <StackPanel Margin="0,0,0,15">
+                    <TextBlock Text="Status" FontWeight="SemiBold"/>
+                    <ComboBox ItemsSource="{Binding StatusOptions}" 
+                              SelectedItem="{Binding Assignment.Status}" 
+                              Margin="0,5,0,0">
+                        <ComboBox.Padding>
+                            <Thickness Left="5" Top="8" Right="5" Bottom="8"/>
+                        </ComboBox.Padding>
+                    </ComboBox>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Buttons -->
+        <Grid Grid.Row="2" Margin="0,15,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1" Content="Cancel" Command="{Binding CancelCommand}" 
+                    Margin="0,0,10,0">
+                <Button.Padding>
+                    <Thickness Left="15" Top="8" Right="15" Bottom="8"/>
+                </Button.Padding>
+            </Button>
+            
+            <Button Grid.Column="2" Content="Save as Draft" Command="{Binding SaveCommand}" 
+                    Margin="0,0,10,0" Background="#FF9800" Foreground="White">
+                <Button.Padding>
+                    <Thickness Left="15" Top="8" Right="15" Bottom="8"/>
+                </Button.Padding>
+            </Button>
+            
+            <Button Grid.Column="3" Content="Publish" Command="{Binding PublishCommand}" 
+                    Background="#4CAF50" Foreground="White">
+                <Button.Padding>
+                    <Thickness Left="15" Top="8" Right="15" Bottom="8"/>
+                </Button.Padding>
+            </Button>
+        </Grid>
+
+        <!-- Loading Overlay -->
+        <Grid Grid.RowSpan="3" Background="#50000000" 
+              Visibility="{Binding IsProcessing, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="White">
+                <Border Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="Saving assignment..." FontSize="16" HorizontalAlignment="Center"/>
+                        <ProgressBar IsIndeterminate="True" Width="200" Height="5" Margin="0,10,0,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

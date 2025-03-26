@@ -67,13 +67,21 @@ namespace StudentManagementV1._5.Services
         // 3. Giúp chuyển đổi từ enum AppViews sang UserControl tương ứng
         private readonly Func<AppViews, UserControl> _pageResolver;
 
+        // Function to resolve views with parameters
+        private readonly Func<AppViews, object, UserControl> _pageResolverWithParameter;
+        
+        // Object parameter to pass to the next view
+        private object _parameter;
+
         // 1. Constructor của NavigationService
         // 2. Khởi tạo service với frame và hàm resolver
         // 3. Được gọi khi ứng dụng khởi động
-        public NavigationService(Frame navigationFrame, Func<AppViews, UserControl> pageResolver)
+        public NavigationService(Frame navigationFrame, Func<AppViews, UserControl> pageResolver, 
+            Func<AppViews, object, UserControl> pageResolverWithParameter = null)
         {
             _navigationFrame = navigationFrame;
             _pageResolver = pageResolver;
+            _pageResolverWithParameter = pageResolverWithParameter;
         }
 
         // 1. Phương thức điều hướng đến màn hình mới
@@ -94,6 +102,37 @@ namespace StudentManagementV1._5.Services
             {
                 _navigationFrame.GoBack();
             }
+        }
+
+        // 1. Phương thức điều hướng đến màn hình mới với tham số
+        // 2. Nhận enum AppViews và object parameter, chuyển thành UserControl
+        // 3. Lưu tham số để truyền vào view cần hiển thị
+        public void NavigateToWithParameter(AppViews view, object parameter)
+        {
+            _parameter = parameter;
+            
+            UserControl page;
+            if (_pageResolverWithParameter != null)
+            {
+                page = _pageResolverWithParameter(view, parameter);
+            }
+            else
+            {
+                // Fall back to regular resolver if parameter resolver is not provided
+                page = _pageResolver(view);
+            }
+            
+            _navigationFrame.Navigate(page);
+        }
+        
+        // 1. Phương thức lấy tham số đã được truyền vào
+        // 2. Được gọi từ view sau khi điều hướng
+        // 3. Trả về tham số và xóa nó
+        public object GetAndClearParameter()
+        {
+            var param = _parameter;
+            _parameter = null;
+            return param;
         }
     }
 }

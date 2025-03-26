@@ -1,6 +1,9 @@
 using StudentManagementV1._5.Commands;
 using StudentManagementV1._5.Services;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace StudentManagementV1._5.ViewModels
@@ -50,6 +53,62 @@ namespace StudentManagementV1._5.ViewModels
         // 3. Khi được gọi, chuyển đến màn hình hiển thị các môn học giáo viên đang dạy
         public ICommand NavigateToMySubjectsCommand { get; }
 
+        // Statistics for the dashboard
+        private int _classCount;
+        private int _studentCount;
+        private int _assignmentCount;
+        private int _pendingSubmissionsCount;
+        private bool _isLoading;
+        private string _teacherFullName = string.Empty;
+        
+        // Database service for querying statistics
+        private readonly DatabaseService _databaseService;
+
+        // Properties for the dashboard statistics
+        public int ClassCount
+        {
+            get => _classCount;
+            set => SetProperty(ref _classCount, value);
+        }
+
+        public int StudentCount
+        {
+            get => _studentCount;
+            set => SetProperty(ref _studentCount, value);
+        }
+
+        public int AssignmentCount
+        {
+            get => _assignmentCount;
+            set => SetProperty(ref _assignmentCount, value);
+        }
+
+        public int PendingSubmissionsCount
+        {
+            get => _pendingSubmissionsCount;
+            set => SetProperty(ref _pendingSubmissionsCount, value);
+        }
+
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
+        }
+
+        public string TeacherFullName
+        {
+            get => _teacherFullName;
+            set => SetProperty(ref _teacherFullName, value);
+        }
+
+        // New navigation commands
+        public ICommand NavigateToMyScheduleCommand { get; }
+        public ICommand NavigateToNotificationsCommand { get; }
+        public ICommand CreateNewAssignmentCommand { get; }
+        public ICommand GradeSubmissionsCommand { get; }
+        public ICommand ViewClassScheduleCommand { get; }
+        public ICommand SendNotificationCommand { get; }
+
         // 1. Constructor của lớp
         // 2. Khởi tạo các tham số và thiết lập lệnh
         // 3. Tạo thông điệp chào mừng dựa trên thông tin người dùng
@@ -57,14 +116,158 @@ namespace StudentManagementV1._5.ViewModels
         {
             _authService = authService;
             _navigationService = navigationService;
+            _databaseService = new DatabaseService(); // Create a database service instance
 
+            // Set the welcome message
             WelcomeMessage = $"Welcome, {_authService.CurrentUser?.Username ?? "Teacher"}!";
 
+            // Initialize navigation commands
             LogoutCommand = new RelayCommand(param => Logout());
-            
             NavigateToAssignmentManagementCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.AssignmentManagement));
-            
             NavigateToMySubjectsCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.MySubjects));
+            
+            // Initialize new navigation commands
+            NavigateToMyScheduleCommand = new RelayCommand(param => MessageBox.Show("Schedule view will be implemented in a future update.", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information));
+            NavigateToNotificationsCommand = new RelayCommand(param => MessageBox.Show("Notifications will be implemented in a future update.", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information));
+            
+            // Quick action commands
+            CreateNewAssignmentCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.AssignmentManagement));
+            GradeSubmissionsCommand = new RelayCommand(param => MessageBox.Show("Grading interface will be implemented in a future update.", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information));
+            ViewClassScheduleCommand = new RelayCommand(param => MessageBox.Show("Class schedule view will be implemented in a future update.", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information));
+            SendNotificationCommand = new RelayCommand(param => MessageBox.Show("Notification sending will be implemented in a future update.", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information));
+
+            // Load dashboard data
+            LoadDashboardDataAsync();
+        }
+
+        // Load statistics for the teacher dashboard
+        private async void LoadDashboardDataAsync()
+        {
+            try
+            {
+                IsLoading = true;
+
+                // Get the current teacher ID
+                int teacherId = _authService.CurrentUser?.UserID ?? 0;
+                if (teacherId == 0)
+                {
+                    MessageBox.Show("Teacher information not found. Please log in again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Load all dashboard data concurrently
+                await Task.WhenAll(
+                    LoadTeacherInfoAsync(teacherId),
+                    LoadClassCountAsync(teacherId),
+                    LoadStudentCountAsync(teacherId),
+                    LoadAssignmentCountAsync(teacherId),
+                    LoadPendingSubmissionsCountAsync(teacherId)
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading dashboard data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        // Load teacher's personal information
+        private async Task LoadTeacherInfoAsync(int teacherId)
+        {
+            string query = @"
+                SELECT t.FirstName, t.LastName 
+                FROM Teachers t
+                WHERE t.UserID = @TeacherID";
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "@TeacherID", teacherId }
+            };
+
+            var result = await _databaseService.ExecuteQueryAsync(query, parameters);
+            if (result.Rows.Count > 0)
+            {
+                string firstName = result.Rows[0]["FirstName"].ToString() ?? string.Empty;
+                string lastName = result.Rows[0]["LastName"].ToString() ?? string.Empty;
+                TeacherFullName = $"{firstName} {lastName}";
+                
+                // Update welcome message with full name
+                WelcomeMessage = $"Welcome, {TeacherFullName}!";
+            }
+        }
+
+        // Load count of classes taught by this teacher
+        private async Task LoadClassCountAsync(int teacherId)
+        {
+            string query = @"
+                SELECT COUNT(DISTINCT ClassID) AS ClassCount 
+                FROM TeacherSubjects 
+                WHERE TeacherID = @TeacherID";
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "@TeacherID", teacherId }
+            };
+
+            var result = await _databaseService.ExecuteScalarAsync(query, parameters);
+            ClassCount = result != null ? Convert.ToInt32(result) : 0;
+        }
+
+        // Load count of students in classes taught by this teacher
+        private async Task LoadStudentCountAsync(int teacherId)
+        {
+            string query = @"
+                SELECT COUNT(DISTINCT s.StudentID) AS StudentCount 
+                FROM Students s
+                JOIN Classes c ON s.ClassID = c.ClassID
+                JOIN TeacherSubjects ts ON c.ClassID = ts.ClassID
+                WHERE ts.TeacherID = @TeacherID";
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "@TeacherID", teacherId }
+            };
+
+            var result = await _databaseService.ExecuteScalarAsync(query, parameters);
+            StudentCount = result != null ? Convert.ToInt32(result) : 0;
+        }
+
+        // Load count of assignments created by this teacher
+        private async Task LoadAssignmentCountAsync(int teacherId)
+        {
+            string query = @"
+                SELECT COUNT(*) AS AssignmentCount 
+                FROM Assignments 
+                WHERE TeacherID = @TeacherID";
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "@TeacherID", teacherId }
+            };
+
+            var result = await _databaseService.ExecuteScalarAsync(query, parameters);
+            AssignmentCount = result != null ? Convert.ToInt32(result) : 0;
+        }
+
+        // Load count of pending submissions to be reviewed
+        private async Task LoadPendingSubmissionsCountAsync(int teacherId)
+        {
+            string query = @"
+                SELECT COUNT(*) AS PendingCount 
+                FROM Submissions s
+                JOIN Assignments a ON s.AssignmentID = a.AssignmentID
+                WHERE a.TeacherID = @TeacherID AND s.Status = 'Submitted'";
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "@TeacherID", teacherId }
+            };
+
+            var result = await _databaseService.ExecuteScalarAsync(query, parameters);
+            PendingSubmissionsCount = result != null ? Convert.ToInt32(result) : 0;
         }
 
         // 1. Phương thức đăng xuất

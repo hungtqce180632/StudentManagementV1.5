@@ -1,0 +1,17 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:StudentManagementV1._5.Converters">
+    
+    <!-- Boolean to Visibility Converters -->
+    <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+    
+    <!-- String to Visibility Converters -->
+    <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+    
+    <!-- Count to Visibility Converters -->
+    <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+    
+    <!-- Boolean Converters -->
+    <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+</ResourceDictionary>

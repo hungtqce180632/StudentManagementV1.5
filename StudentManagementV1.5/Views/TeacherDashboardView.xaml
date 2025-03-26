@@ -62,10 +62,12 @@
                         Margin="0,0,0,10"/>
                 
                 <Button Content="My Schedule" 
+                        Command="{Binding NavigateToMyScheduleCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
                 
                 <Button Content="Notifications" 
+                        Command="{Binding NavigateToNotificationsCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
 
@@ -114,7 +116,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#4CAF50">
                         <StackPanel>
                             <TextBlock Text="Classes" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}" Height="40"/>
+                            <TextBlock Text="{Binding ClassCount}" Style="{StaticResource StatValue}" Height="40"/>
                             <TextBlock Text="Assigned Classes" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -123,7 +125,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#2196F3">
                         <StackPanel>
                             <TextBlock Text="Students" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}" Height="39"/>
+                            <TextBlock Text="{Binding StudentCount}" Style="{StaticResource StatValue}" Height="39"/>
                             <TextBlock Text="Total Students" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -132,7 +134,7 @@
                     <Border Style="{StaticResource StatCard}" Background="#FF9800">
                         <StackPanel>
                             <TextBlock Text="Assignments" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}" Height="39"/>
+                            <TextBlock Text="{Binding AssignmentCount}" Style="{StaticResource StatValue}" Height="39"/>
                             <TextBlock Text="Current Assignments" Style="{StaticResource StatDesc}"/>
                         </StackPanel>
                     </Border>
@@ -141,17 +143,23 @@
                     <Border Style="{StaticResource StatCard}" Background="#9C27B0">
                         <StackPanel>
                             <TextBlock Text="Submissions" Style="{StaticResource StatTitle}"/>
-                            <TextBlock Text="0" Style="{StaticResource StatValue}" Height="40"/>
+                            <TextBlock Text="{Binding PendingSubmissionsCount}" Style="{StaticResource StatValue}" Height="40"/>
                             <TextBlock Text="Pending Reviews" Style="{StaticResource StatDesc}" Height="20" RenderTransformOrigin="0.5,1.145"/>
                         </StackPanel>
                     </Border>
                 </WrapPanel>
 
+                <!-- Loading indicator -->
+                <ProgressBar Grid.Row="0" Grid.ColumnSpan="2" 
+                           Height="5" IsIndeterminate="True" 
+                           Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           Margin="0,0,0,10"/>
+
                 <!-- Upcoming Classes -->
                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource ContentPanel}" Margin="0,0,10,0">
                     <StackPanel>
                         <TextBlock Text="Upcoming Classes" Style="{StaticResource SectionTitle}"/>
-                        <TextBlock Text="No upcoming classes" Margin="0,50,0,0" HorizontalAlignment="Center" Opacity="0.5"/>
+                        <TextBlock Text="Coming soon..." Margin="0,50,0,0" HorizontalAlignment="Center" Opacity="0.5"/>
                     </StackPanel>
                 </Border>
 
@@ -159,10 +167,10 @@
                 <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource ContentPanel}" Margin="10,0,0,0">
                     <StackPanel>
                         <TextBlock Text="Quick Actions" Style="{StaticResource SectionTitle}"/>
-                        <Button Content="Create New Assignment" Command="{Binding NavigateToAssignmentManagementCommand}" Margin="0,10,0,5" Padding="10,5"/>
-                        <Button Content="Grade Submissions" Margin="0,5,0,5" Padding="10,5"/>
-                        <Button Content="View Class Schedule" Margin="0,5,0,5" Padding="10,5"/>
-                        <Button Content="Send Notification" Margin="0,5,0,5" Padding="10,5"/>
+                        <Button Content="Create New Assignment" Command="{Binding CreateNewAssignmentCommand}" Margin="0,10,0,5" Padding="10,5"/>
+                        <Button Content="Grade Submissions" Command="{Binding GradeSubmissionsCommand}" Margin="0,5,0,5" Padding="10,5"/>
+                        <Button Content="View Class Schedule" Command="{Binding ViewClassScheduleCommand}" Margin="0,5,0,5" Padding="10,5"/>
+                        <Button Content="Send Notification" Command="{Binding SendNotificationCommand}" Margin="0,5,0,5" Padding="10,5"/>
                     </StackPanel>
                 </Border>
             </Grid>

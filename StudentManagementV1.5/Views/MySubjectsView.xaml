@@ -19,12 +19,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:StudentManagementV1._5.Views"
-             xmlns:converters="clr-namespace:StudentManagementV1._5.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="650" d:DesignWidth="1100">
-    <UserControl.Resources>
-        <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
-    </UserControl.Resources>
     
     <Grid Margin="20">
         <Grid.RowDefinitions>

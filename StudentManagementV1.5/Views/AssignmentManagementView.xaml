@@ -20,10 +20,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:StudentManagementV1._5.Views"
+             xmlns:converters="clr-namespace:StudentManagementV1._5.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="650" d:DesignWidth="1100">
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -35,23 +37,231 @@
             <TextBlock Text="Create and manage assignments for your classes" FontSize="14" Opacity="0.7"/>
         </StackPanel>
 
+        <!-- Filters and Actions -->
+        <Grid Grid.Row="1" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Subject Filter -->
+            <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,15,0">
+                <TextBlock Text="Subject" Margin="0,0,0,5" FontSize="12" Opacity="0.7"/>
+                <ComboBox Width="150" ItemsSource="{Binding Subjects}" 
+                          SelectedItem="{Binding SelectedSubject}"
+                          DisplayMemberPath="SubjectName"/>
+            </StackPanel>
+
+            <!-- Class Filter -->
+            <StackPanel Grid.Column="1" Orientation="Vertical" Margin="0,0,15,0">
+                <TextBlock Text="Class" Margin="0,0,0,5" FontSize="12" Opacity="0.7"/>
+                <ComboBox Width="150" ItemsSource="{Binding Classes}" 
+                          SelectedItem="{Binding SelectedClass}"
+                          DisplayMemberPath="ClassName"/>
+            </StackPanel>
+
+            <!-- Status Filter -->
+            <StackPanel Grid.Column="2" Orientation="Vertical" Margin="0,0,15,0">
+                <TextBlock Text="Status" Margin="0,0,0,5" FontSize="12" Opacity="0.7"/>
+                <ComboBox Width="120" ItemsSource="{Binding StatusOptions}" 
+                          SelectedItem="{Binding FilterStatus}"/>
+            </StackPanel>
+
+            <!-- Search Box -->
+            <StackPanel Grid.Column="3" Orientation="Vertical" Margin="0,0,15,0">
+                <TextBlock Text="Search" Margin="0,0,0,5" FontSize="12" Opacity="0.7"/>
+                <Grid>
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                             Padding="5,3" MinWidth="200"/>
+                    <Button Content="✕" HorizontalAlignment="Right" Background="Transparent" 
+                            BorderThickness="0" Padding="5,3" Opacity="0.5"
+                            Command="{Binding ClearFiltersCommand}"/>
+                </Grid>
+            </StackPanel>
+
+            <!-- Refresh Button -->
+            <Button Grid.Column="4" Margin="0,0,10,0" Padding="8,3" VerticalAlignment="Bottom"
+                    Command="{Binding RefreshCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="🔄" FontSize="14" VerticalAlignment="Center"/>
+                    <TextBlock Text="Refresh" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <!-- Add Assignment Button -->
+            <Button Grid.Column="5" Margin="0,0,0,0" Padding="10,5" 
+                    Background="#2196F3" Foreground="White" VerticalAlignment="Bottom"
+                    Command="{Binding CreateAssignmentCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="+" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+                    <TextBlock Text="New Assignment" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
         <!-- Main Content -->
-        <Border Grid.Row="1" 
+        <Border Grid.Row="2" 
                 BorderBrush="#EEEEEE" 
                 BorderThickness="1" 
                 CornerRadius="5" 
                 Background="White">
             <Grid>
-                <TextBlock Text="This feature will be implemented in a future update." 
+                <!-- Assignment DataGrid -->
+                <DataGrid ItemsSource="{Binding Assignments}"
+                          SelectedItem="{Binding SelectedAssignment}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          BorderThickness="0"
+                          CanUserSortColumns="True"
+                          HeadersVisibility="Column"
+                          Margin="0,0,0,0">
+                    <DataGrid.Columns>
+                        <!-- Title Column -->
+                        <DataGridTemplateColumn Header="Title" Width="*" SortMemberPath="Title">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="5,8">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Description}" 
+                                                   TextTrimming="CharacterEllipsis" 
+                                                   Opacity="0.7" FontSize="12" 
+                                                   MaxHeight="20"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- Subject/Class Column -->
+                        <DataGridTemplateColumn Header="Subject / Class" Width="180">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="5,8">
+                                        <TextBlock Text="{Binding SubjectName}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding ClassName}" Opacity="0.7" FontSize="12"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- Due Date Column -->
+                        <DataGridTemplateColumn Header="Due Date" Width="120" SortMemberPath="DueDate">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="5,8">
+                                        <TextBlock Text="{Binding DueDate, StringFormat='{}{0:MMM dd, yyyy}'}" 
+                                                   FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding DueDate, StringFormat='{}{0:h:mm tt}'}" 
+                                                   Opacity="0.7" FontSize="12"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- Status Column -->
+                        <DataGridTemplateColumn Header="Status" Width="100" SortMemberPath="Status">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Margin="5,8" Padding="5,2" CornerRadius="3" HorizontalAlignment="Left">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#E0E0E0"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Draft">
+                                                        <Setter Property="Background" Value="#FFD700"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Published">
+                                                        <Setter Property="Background" Value="#4CAF50"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Closed">
+                                                        <Setter Property="Background" Value="#F44336"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Status}" Foreground="White" 
+                                                   FontWeight="SemiBold" FontSize="12"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- Submissions Column -->
+                        <DataGridTextColumn Header="Submissions" Binding="{Binding SubmissionCount}" Width="100"/>
+                        
+                        <!-- Points Column -->
+                        <DataGridTextColumn Header="Points" Binding="{Binding MaxPoints}" Width="70"/>
+                        
+                        <!-- Actions Column -->
+                        <DataGridTemplateColumn Header="Actions" Width="180">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="5,8">
+                                        <Button Content="View Submissions" 
+                                                Command="{Binding DataContext.ViewSubmissionsCommand, 
+                                                    RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                CommandParameter="{Binding}"
+                                                Margin="0,0,5,0" Background="#2196F3" Foreground="White"
+                                                Visibility="{Binding SubmissionCount, Converter={StaticResource StringToVisibilityConverter}}">
+                                            <Button.Padding>
+                                                <Thickness Left="5" Top="2" Right="5" Bottom="2"/>
+                                            </Button.Padding>
+                                        </Button>
+                                        <Button Content="Edit" 
+                                                Command="{Binding DataContext.EditAssignmentCommand, 
+                                                    RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                CommandParameter="{Binding}"
+                                                Margin="0,0,5,0" Background="#FF9800" Foreground="White">
+                                            <Button.Padding>
+                                                <Thickness Left="5" Top="2" Right="5" Bottom="2"/>
+                                            </Button.Padding>
+                                        </Button>
+                                        <Button Content="Delete" 
+                                                Command="{Binding DataContext.DeleteAssignmentCommand, 
+                                                    RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                CommandParameter="{Binding}"
+                                                Background="#F44336" Foreground="White">
+                                            <Button.Padding>
+                                                <Thickness Left="5" Top="2" Right="5" Bottom="2"/>
+                                            </Button.Padding>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                    
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Height" Value="60"/>
+                        </Style>
+                    </DataGrid.RowStyle>
+                </DataGrid>
+
+                <!-- Empty State Message -->
+                <TextBlock Text="{Binding ErrorMessage}" 
                            HorizontalAlignment="Center" 
                            VerticalAlignment="Center"
-                           FontSize="16"
-                           Opacity="0.7"/>
+                           Visibility="{Binding Assignments.Count, Converter={StaticResource CountToVisibilityConverter}, ConverterParameter=0}"
+                           Foreground="#757575"
+                           FontSize="16"/>
+
+                <!-- Loading Indicator -->
+                <StackPanel HorizontalAlignment="Center" 
+                            VerticalAlignment="Center" 
+                            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="Loading assignments..." FontSize="16" HorizontalAlignment="Center"/>
+                    <ProgressBar IsIndeterminate="True" Width="200" Height="10" Margin="0,10,0,0"/>
+                </StackPanel>
             </Grid>
         </Border>
 
         <!-- Footer -->
-        <Button Grid.Row="2" 
+        <Button Grid.Row="3" 
                 Content="Back to Dashboard" 
                 Command="{Binding BackCommand}" 
                 HorizontalAlignment="Left" 
