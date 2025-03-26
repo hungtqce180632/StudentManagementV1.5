@@ -3,18 +3,17 @@
     View AddEditNotificationView
     
     Tại sao sử dụng:
-    - Hiển thị form để thêm mới hoặc chỉnh sửa thông báo
-    - Cho phép người dùng nhập nội dung và chọn người nhận thông báo
+    - Cung cấp giao diện để thêm và chỉnh sửa thông báo
+    - Được hiển thị dưới dạng dialog từ màn hình quản lý thông báo
     
     Quan hệ với các lớp khác:
     - Data Context: AddEditNotificationViewModel
-    - Sử dụng các Converter để chuyển đổi dữ liệu
+    - Được gọi từ NotificationManagementViewModel
     
     Chức năng chính:
-    - Nhập tiêu đề và nội dung thông báo
-    - Chọn loại người nhận (tất cả, lớp học, giáo viên, học sinh)
-    - Thiết lập ngày hết hạn (nếu có)
-    - Lưu hoặc hủy thay đổi
+    - Nhập và xác thực thông tin thông báo mới hoặc cập nhật thông báo hiện có
+    - Chọn đối tượng nhận thông báo
+    - Thiết lập thời gian hiệu lực của thông báo
  -->
 <Window x:Class="StudentManagementV1._5.Views.AddEditNotificationView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -22,10 +21,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StudentManagementV1._5.Views"
-        xmlns:converters="clr-namespace:StudentManagementV1._5.Converters"
         mc:Ignorable="d"
         Title="{Binding DialogTitle}"
-        Height="530" Width="500"
+        Height="600" Width="550"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
     <Grid Margin="20">
@@ -35,69 +33,86 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Tiêu đề hộp thoại -->
+        <!-- Header -->
         <TextBlock Grid.Row="0" Text="{Binding DialogTitle}" 
                    FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
 
-        <!-- Form nhập liệu -->
+        <!-- Form Fields -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <!-- Tiêu đề thông báo - trường bắt buộc -->
-                <TextBlock Text="Title *" Margin="0,0,0,5"/>
-                <TextBox Text="{Binding Notification.Title, UpdateSourceTrigger=PropertyChanged}" 
-                         Margin="0,0,0,15" Padding="5"/>
+                <!-- Title -->
+                <TextBlock Text="Title:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" 
+                         Padding="5" Margin="0,0,0,15"/>
+                <TextBlock Text="{Binding TitleError}" Foreground="Red" 
+                           Visibility="{Binding HasTitleError, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           Margin="0,-10,0,15"/>
 
-                <!-- Nội dung thông báo - trường bắt buộc -->
-                <TextBlock Text="Message *" Margin="0,0,0,5"/>
-                <TextBox Text="{Binding Notification.Message, UpdateSourceTrigger=PropertyChanged}" 
-                         TextWrapping="Wrap" AcceptsReturn="True" 
-                         Height="100" VerticalScrollBarVisibility="Auto"
-                         Margin="0,0,0,15" Padding="5"/>
+                <!-- Message -->
+                <TextBlock Text="Message:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" 
+                         TextWrapping="Wrap" AcceptsReturn="True" Height="100"
+                         Padding="5" Margin="0,0,0,15"/>
+                <TextBlock Text="{Binding MessageError}" Foreground="Red" 
+                           Visibility="{Binding HasMessageError, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           Margin="0,-10,0,15"/>
 
-                <!-- Loại người nhận -->
-                <TextBlock Text="Recipient Type *" Margin="0,0,0,5"/>
-                <ComboBox ItemsSource="{Binding RecipientTypes}"
+                <!-- Recipient Type -->
+                <TextBlock Text="Recipient Type:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <ComboBox ItemsSource="{Binding RecipientTypes}" 
                           SelectedItem="{Binding SelectedRecipientType}"
-                          Margin="0,0,0,15" Padding="5"/>
+                          Padding="5" Margin="0,0,0,15"/>
+                <TextBlock Text="{Binding RecipientTypeError}" Foreground="Red" 
+                           Visibility="{Binding HasRecipientTypeError, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           Margin="0,-10,0,15"/>
 
-                <!-- Người nhận cụ thể -->
-                <TextBlock Text="Recipient" Margin="0,0,0,5"
-                           Visibility="{Binding SelectedRecipientType, Converter={StaticResource StringToVisibilityConverter}, 
-                                       ConverterParameter=All}"/>
-                <ComboBox ItemsSource="{Binding Recipients}"
+                <!-- Specific Recipient -->
+                <TextBlock Text="Specific Recipient:" FontWeight="SemiBold" Margin="0,0,0,5"
+                           Visibility="{Binding ShowSpecificRecipient, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <ComboBox ItemsSource="{Binding Recipients}" 
                           SelectedItem="{Binding SelectedRecipient}"
-                          DisplayMemberPath="Name"
-                          Margin="0,0,0,15" Padding="5"
-                          Visibility="{Binding SelectedRecipientType, Converter={StaticResource StringToVisibilityConverter}, 
-                                      ConverterParameter=All}"/>
+                          DisplayMemberPath="DisplayName"
+                          Padding="5" Margin="0,0,0,15"
+                          Visibility="{Binding ShowSpecificRecipient, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-                <!-- Ngày hết hạn -->
-                <CheckBox Content="Has Expiry Date" 
-                          IsChecked="{Binding HasExpiryDate}"
-                          Margin="0,0,0,5"/>
+                <!-- Expiry Date -->
+                <TextBlock Text="Expiry Date (Optional):" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <DatePicker SelectedDate="{Binding ExpiryDate}" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding ExpiryTime, UpdateSourceTrigger=PropertyChanged}" 
+                         Padding="5" Margin="0,0,0,15"
+                         ToolTip="Time in 24-hour format (HH:mm)"/>
+                <TextBlock Text="{Binding ExpiryDateError}" Foreground="Red" 
+                           Visibility="{Binding HasExpiryDateError, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           Margin="0,-10,0,15"/>
                 
-                <StackPanel Visibility="{Binding HasExpiryDate, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock Text="Expiry Date" Margin="0,5,0,5"/>
-                    <DatePicker SelectedDate="{Binding ExpiryDate}" 
-                             Margin="0,0,0,15" Padding="5"/>
-                </StackPanel>
-
-                <!-- Thông báo lỗi -->
-                <TextBlock Text="{Binding ErrorMessage}" 
-                           Foreground="Red" 
-                           TextWrapping="Wrap"
-                           Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"
-                           Margin="0,0,0,15"/>
+                <!-- Is Read Option -->
+                <CheckBox Content="Mark as Read" IsChecked="{Binding IsRead}" 
+                          Margin="0,0,0,15"
+                          Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Nút thao tác -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
-            <Button Content="Cancel" Command="{Binding CancelCommand}" 
-                    Width="100" Margin="0,0,10,0" Padding="5"/>
-            <Button Content="Save" Command="{Binding SaveCommand}" 
-                    Width="100" Padding="5"
-                    Background="#4CAF50" Foreground="White"/>
-        </StackPanel>
+        <!-- Button Row -->
+        <Grid Grid.Row="2" Margin="0,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1" Content="Cancel" Command="{Binding CancelCommand}" 
+                    Padding="15,5" Margin="0,0,10,0"/>
+            <Button Grid.Column="2" Content="Save" Command="{Binding SaveCommand}" 
+                    Background="#2196F3" Foreground="White" Padding="15,5"/>
+        </Grid>
+        
+        <!-- Loading Overlay -->
+        <Grid Grid.RowSpan="3" Background="#80000000" 
+              Visibility="{Binding IsProcessing, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Processing..." Foreground="White" FontSize="16" HorizontalAlignment="Center"/>
+                <ProgressBar IsIndeterminate="True" Width="200" Height="10" Margin="0,10,0,0"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

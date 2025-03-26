@@ -3,16 +3,17 @@
     
     Tại sao sử dụng:
     - Hiển thị và quản lý danh sách thông báo trong hệ thống
-    - Cho phép tìm kiếm, lọc, tạo mới, chỉnh sửa và xóa thông báo
+    - Cho phép tìm kiếm, lọc, thêm, chỉnh sửa và xóa thông báo
     
     Quan hệ với các lớp khác:
     - Data Context: NotificationManagementViewModel
-    - Sử dụng converter để chuyển đổi Boolean sang Visibility
+    - Sử dụng các dialog để thêm và sửa thông báo
     
     Chức năng chính:
-    - Hiển thị danh sách thông báo trong hệ thống
-    - Lọc thông báo theo loại người nhận và trạng thái hết hạn
-    - Tạo mới, xem chi tiết, chỉnh sửa và xóa thông báo
+    - Hiển thị danh sách thông báo với thông tin chi tiết
+    - Tìm kiếm thông báo theo tiêu đề và nội dung
+    - Lọc thông báo theo loại đối tượng nhận và trạng thái
+    - Thêm, chỉnh sửa và xóa thông báo
  -->
 <UserControl x:Class="StudentManagementV1._5.Views.NotificationManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -21,7 +22,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:StudentManagementV1._5.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -33,7 +34,7 @@
         <!-- Header -->
         <TextBlock Grid.Row="0" Text="Notification Management" FontSize="24" FontWeight="Bold" Margin="10"/>
 
-        <!-- Filters -->
+        <!-- Filter Row -->
         <Grid Grid.Row="1" Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -41,59 +42,49 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
+            
             <TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
                      Margin="0,0,10,0" Padding="5" ToolTip="Search by title or message content"/>
             
-            <ComboBox Grid.Column="1" ItemsSource="{Binding RecipientTypeFilters}" 
-                      SelectedItem="{Binding SelectedRecipientTypeFilter}"
-                      Width="120" Margin="0,0,10,0"/>
+            <ComboBox Grid.Column="1" Width="150" Margin="0,0,10,0"
+                      ItemsSource="{Binding RecipientTypes}"
+                      SelectedItem="{Binding SelectedRecipientType}"/>
             
-            <CheckBox Grid.Column="2" Content="Show Expired" 
-                      IsChecked="{Binding ShowExpired}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            <CheckBox Grid.Column="2" Content="Show Expired" Margin="0,0,10,0"
+                      IsChecked="{Binding ShowExpired}"/>
             
-            <Button Grid.Column="3" Content="Create Notification" Command="{Binding CreateNotificationCommand}" 
-                    Padding="10,5" Background="#4CAF50" Foreground="White"/>
+            <Button Grid.Column="3" Content="+ Add Notification" Command="{Binding AddNotificationCommand}" 
+                    Background="#2196F3" Foreground="White" Padding="10,5"/>
         </Grid>
 
-        <!-- Notification List -->
+        <!-- Data Grid -->
         <DataGrid Grid.Row="2" ItemsSource="{Binding Notifications}" SelectedItem="{Binding SelectedNotification}"
                   AutoGenerateColumns="False" IsReadOnly="True" Margin="10"
                   GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#DDDDDD"
                   CanUserSortColumns="True" CanUserResizeColumns="True">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding NotificationID}" Width="50"/>
-                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="200"/>
-                <DataGridTextColumn Header="Recipient Type" Binding="{Binding RecipientType}" Width="120"/>
-                <DataGridTextColumn Header="Recipient" Binding="{Binding RecipientName}" Width="150"/>
-                <DataGridTextColumn Header="Created Date" Binding="{Binding CreatedDate, StringFormat=\{0:yyyy-MM-dd HH:mm\}}" Width="150"/>
-                <DataGridTextColumn Header="Expiry Date" Binding="{Binding ExpiryDate, StringFormat=\{0:yyyy-MM-dd HH:mm\}}" Width="150"/>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*"/>
+                <DataGridTextColumn Header="Recipient" Binding="{Binding RecipientName}" Width="130"/>
+                <DataGridTextColumn Header="Created" Binding="{Binding CreatedDateDisplay}" Width="130"/>
+                <DataGridTextColumn Header="Expires" Binding="{Binding ExpiryDateDisplay}" Width="130"/>
                 <DataGridTemplateColumn Header="Status" Width="80">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding StatusDisplay}"/>
+                            <TextBlock Text="{Binding StatusDisplay}" 
+                                       Foreground="{Binding IsActive, Converter={StaticResource BoolToStatusColorConverter}}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Actions" Width="180">
+                <DataGridTemplateColumn Header="Actions" Width="150">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <Button Content="View" 
-                                        Command="{Binding DataContext.ViewNotificationCommand, 
-                                            RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                        CommandParameter="{Binding}"
-                                        Margin="0,0,5,0" Padding="5,2" Background="#2196F3" Foreground="White"/>
-                                <Button Content="Edit" 
-                                        Command="{Binding DataContext.EditNotificationCommand, 
-                                            RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                        CommandParameter="{Binding}"
-                                        Margin="0,0,5,0" Padding="5,2" Background="#FF9800" Foreground="White"/>
-                                <Button Content="Delete" 
-                                        Command="{Binding DataContext.DeleteNotificationCommand, 
-                                            RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                        CommandParameter="{Binding}"
-                                        Padding="5,2" Background="#F44336" Foreground="White"/>
+                                <Button Content="Edit" Command="{Binding DataContext.EditNotificationCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}" Margin="0,0,5,0" Padding="5,2"
+                                        Background="#2196F3" Foreground="White"/>
+                                <Button Content="Delete" Command="{Binding DataContext.DeleteNotificationCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}" Padding="5,2"
+                                        Background="#f44336" Foreground="White"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

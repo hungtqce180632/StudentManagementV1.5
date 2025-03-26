@@ -15,7 +15,7 @@ namespace StudentManagementV1._5.Views
      * 
      * Chức năng chính:
      * - Hiển thị danh sách thông báo với khả năng tìm kiếm và lọc
-     * - Cung cấp giao diện để tạo mới, xem chi tiết, sửa và xóa thông báo
+     * - Cung cấp giao diện để thêm, chỉnh sửa và xóa thông báo
      */
     public partial class NotificationManagementView : UserControl
     {
