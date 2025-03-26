@@ -1,12 +1,118 @@
-﻿<Window x:Class="StudentManagementV1._5.Views.MySubjectsView"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:StudentManagementV1._5.Views"
-        mc:Ignorable="d"
-        Title="MySubjectsView" Height="450" Width="800">
-    <Grid>
-        
+﻿<!-- 
+    View MySubjectsView
+    
+    Tại sao sử dụng:
+    - Hiển thị danh sách các môn học mà giáo viên đang giảng dạy
+    - Cung cấp các thao tác liên quan đến quản lý môn học của giáo viên
+    
+    Quan hệ với các lớp khác:
+    - Data Context: MySubjectsViewModel
+    - Được điều hướng từ: TeacherDashboardView
+    
+    Chức năng chính:
+    - Hiển thị danh sách môn học và lớp học đang giảng dạy
+    - Cho phép xem danh sách học sinh và lịch học của môn học
+ -->
+<UserControl x:Class="StudentManagementV1._5.Views.MySubjectsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StudentManagementV1._5.Views"
+             xmlns:converters="clr-namespace:StudentManagementV1._5.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="650" d:DesignWidth="1100">
+    <UserControl.Resources>
+        <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+    </UserControl.Resources>
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="My Subjects" FontSize="24" FontWeight="Bold" Margin="0,0,0,10"/>
+            <TextBlock Text="View and manage the subjects you are teaching" FontSize="14" Opacity="0.7"/>
+        </StackPanel>
+
+        <!-- Main Content -->
+        <Border Grid.Row="1" 
+                BorderBrush="#EEEEEE" 
+                BorderThickness="1" 
+                CornerRadius="5" 
+                Background="White">
+            <Grid>
+                <!-- Data Grid -->
+                <DataGrid ItemsSource="{Binding TeacherSubjects}"
+                          SelectedItem="{Binding SelectedSubject}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          BorderThickness="0"
+                          CanUserSortColumns="True"
+                          HeadersVisibility="Column"
+                          Margin="0,10,0,0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Subject" Binding="{Binding SubjectName}" Width="150"/>
+                        <DataGridTextColumn Header="Class" Binding="{Binding ClassName}" Width="120"/>
+                        <DataGridTextColumn Header="Academic Year" Binding="{Binding AcademicYear}" Width="120"/>
+                        <DataGridTextColumn Header="Credits" Binding="{Binding Credits}" Width="70"/>
+                        <DataGridTextColumn Header="Students" Binding="{Binding StudentCount}" Width="80"/>
+                        <DataGridTemplateColumn Header="Actions" Width="200">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="View Students" 
+                                                Command="{Binding DataContext.ViewStudentsCommand, 
+                                                    RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                CommandParameter="{Binding}"
+                                                Margin="0,0,5,0" Padding="5,2" Background="#2196F3" Foreground="White"/>
+                                        <Button Content="View Schedule" 
+                                                Command="{Binding DataContext.ViewScheduleCommand, 
+                                                    RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                CommandParameter="{Binding}"
+                                                Padding="5,2" Background="#4CAF50" Foreground="White"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                    
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Height" Value="40"/>
+                        </Style>
+                    </DataGrid.Resources>
+                </DataGrid>
+
+                <!-- Empty State Message -->
+                <TextBlock Text="{Binding ErrorMessage}" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"
+                           Visibility="{Binding TeacherSubjects.Count, Converter={StaticResource CountToVisibilityConverter}, ConverterParameter=0}"
+                           Foreground="#757575"
+                           FontSize="16"/>
+
+                <!-- Loading Indicator -->
+                <StackPanel HorizontalAlignment="Center" 
+                            VerticalAlignment="Center" 
+                            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="Loading..." FontSize="16" HorizontalAlignment="Center"/>
+                    <ProgressBar IsIndeterminate="True" Width="200" Height="10" Margin="0,10,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Footer -->
+        <Button Grid.Row="2" 
+                Content="Back to Dashboard" 
+                Command="{Binding BackCommand}" 
+                HorizontalAlignment="Left" 
+                Margin="0,15,0,0" 
+                Padding="15,5"/>
     </Grid>
-</Window>
+</UserControl>

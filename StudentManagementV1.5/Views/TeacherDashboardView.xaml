@@ -52,7 +52,7 @@
                         IsEnabled="False"/>
                 
                 <Button Content="My Subjects" 
-                         Command="{Binding SubjectsCommand}"
+                        Command="{Binding NavigateToMySubjectsCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
                 

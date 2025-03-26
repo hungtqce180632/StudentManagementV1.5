@@ -125,5 +125,10 @@ namespace StudentManagementV1._5.Converters
         // 2. Cung cấp như một thuộc tính tĩnh
         // 3. Có thể truy cập trực tiếp từ XAML
         public static readonly StringToVisibilityConverter StringToVisibility = new StringToVisibilityConverter();
+        
+        // 1. Khởi tạo instance của CountToVisibilityConverter
+        // 2. Cung cấp như một thuộc tính tĩnh
+        // 3. Có thể truy cập trực tiếp từ XAML
+        public static readonly CountToVisibilityConverter CountToVisibility = new CountToVisibilityConverter();
     }
 }

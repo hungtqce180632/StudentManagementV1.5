@@ -35,19 +35,20 @@ namespace StudentManagementV1._5.ViewModels
             set => SetProperty(ref _welcomeMessage, value);
         }
 
-
         // 1. Lệnh đăng xuất
         // 2. Binding đến nút "Đăng xuất" trong UI
         // 3. Khi được gọi, đăng xuất và chuyển về màn hình đăng nhập
-
-        public ICommand SubjectsCommand { get; }
-
         public ICommand LogoutCommand { get; }
         
         // 1. Lệnh điều hướng đến màn hình quản lý bài tập
         // 2. Binding đến nút "Quản lý bài tập" trong UI
         // 3. Khi được gọi, chuyển đến màn hình quản lý bài tập
         public ICommand NavigateToAssignmentManagementCommand { get; }
+        
+        // 1. Lệnh điều hướng đến màn hình môn học của tôi
+        // 2. Binding đến nút "Môn học của tôi" trong UI
+        // 3. Khi được gọi, chuyển đến màn hình hiển thị các môn học giáo viên đang dạy
+        public ICommand NavigateToMySubjectsCommand { get; }
 
         // 1. Constructor của lớp
         // 2. Khởi tạo các tham số và thiết lập lệnh
@@ -62,6 +63,8 @@ namespace StudentManagementV1._5.ViewModels
             LogoutCommand = new RelayCommand(param => Logout());
             
             NavigateToAssignmentManagementCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.AssignmentManagement));
+            
+            NavigateToMySubjectsCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.MySubjects));
         }
 
         // 1. Phương thức đăng xuất
@@ -72,6 +75,5 @@ namespace StudentManagementV1._5.ViewModels
             _authService.Logout();
             _navigationService.NavigateTo(AppViews.Login);
         }
-
     }
 }

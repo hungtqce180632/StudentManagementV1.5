@@ -151,28 +151,44 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     // 3. Được gọi bởi NavigationService khi cần chuyển đổi view
     private UserControl ResolveView(AppViews view)
     {
-        return view switch
+        switch (view)
         {
             // Basic views
-            AppViews.Login => new LoginView { DataContext = new LoginViewModel(_authService, _navigationService) },
-            AppViews.PasswordReset => new PasswordResetView { DataContext = new PasswordResetViewModel(_authService, _emailService, _navigationService) },
+            case AppViews.Login:
+                return new LoginView { DataContext = new LoginViewModel(_authService, _navigationService) };
+            case AppViews.PasswordReset:
+                return new PasswordResetView { DataContext = new PasswordResetViewModel(_authService, _emailService, _navigationService) };
             
             // Dashboard views
-            AppViews.AdminDashboard => new AdminDashboardView { DataContext = new AdminDashboardViewModel(_authService, _navigationService) },
-            AppViews.TeacherDashboard => new TeacherDashboardView { DataContext = new TeacherDashboardViewModel(_authService, _navigationService) },
-            AppViews.StudentDashboard => new StudentDashboardView { DataContext = new StudentDashboardViewModel(_authService, _navigationService) },
+            case AppViews.AdminDashboard:
+                return new AdminDashboardView { DataContext = new AdminDashboardViewModel(_authService, _navigationService) };
+            case AppViews.TeacherDashboard:
+                return new TeacherDashboardView { DataContext = new TeacherDashboardViewModel(_authService, _navigationService) };
+            case AppViews.StudentDashboard:
+                return new StudentDashboardView { DataContext = new StudentDashboardViewModel(_authService, _navigationService) };
             
             // Admin management views
-            AppViews.UserManagement => new UserManagementView { DataContext = new UserManagementViewModel(_databaseService, _authService, _navigationService) },
-            AppViews.ScheduleManagement => new ScheduleManagementView { DataContext = new ScheduleManagementViewModel(_databaseService, _navigationService) },
-            AppViews.ClassManagement => new ClassManagementView { DataContext = new ClassManagementViewModel(_databaseService, _navigationService) },
-            AppViews.SubjectManagement => new SubjectManagementView { DataContext = new SubjectManagementViewModel(_databaseService, _navigationService) },
-            AppViews.NotificationManagement => new NotificationManagementView { DataContext = new NotificationManagementViewModel(_databaseService, _authService, _navigationService) },
-            AppViews.ExamManagement => new ExamManagementView { DataContext = new ExamManagementViewModel(_databaseService, _navigationService) },
+            case AppViews.UserManagement:
+                return new UserManagementView { DataContext = new UserManagementViewModel(_databaseService, _authService, _navigationService) };
+            case AppViews.ScheduleManagement:
+                return new ScheduleManagementView { DataContext = new ScheduleManagementViewModel(_databaseService, _navigationService) };
+            case AppViews.ClassManagement:
+                return new ClassManagementView { DataContext = new ClassManagementViewModel(_databaseService, _navigationService) };
+            case AppViews.SubjectManagement:
+                return new SubjectManagementView { DataContext = new SubjectManagementViewModel(_databaseService, _navigationService) };
+            case AppViews.NotificationManagement:
+                return new NotificationManagementView { DataContext = new NotificationManagementViewModel(_databaseService, _authService, _navigationService) };
+            case AppViews.ExamManagement:
+                return new ExamManagementView { DataContext = new ExamManagementViewModel(_databaseService, _navigationService) };
+            case AppViews.AssignmentManagement:
+                return new AssignmentManagementView { DataContext = new AssignmentManagementViewModel(_databaseService, _navigationService, _authService) };
+            case AppViews.MySubjects:
+                return new MySubjectsView { DataContext = new MySubjectsViewModel(_databaseService, _navigationService, _authService) };
 
             // Add the rest of the views as you implement them
-            _ => throw new System.NotImplementedException($"View {view} is not implemented")
-        };
+            default:
+                throw new NotImplementedException($"View {view} is not implemented");
+        }
     }
 
     // 1. Phương thức thông báo khi thuộc tính thay đổi

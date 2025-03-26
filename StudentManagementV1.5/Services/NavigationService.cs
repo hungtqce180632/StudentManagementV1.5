@@ -41,15 +41,14 @@ namespace StudentManagementV1._5.Services
         // 3. Chỉ Giáo viên mới có quyền truy cập
         // Teacher views
         AssignmentManagement,
+        MySubjects,
         
         // 1. Các màn hình dành cho Học sinh
         // 2. Bao gồm các chức năng học tập
         // 3. Chỉ Học sinh mới có quyền truy cập
         // Student views
         SubmissionManagement,
-        ViewAssignments,
-
-        MySubjects
+        ViewAssignments
     }
 
     // Lớp NavigationService
