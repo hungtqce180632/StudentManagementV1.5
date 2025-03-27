@@ -152,7 +152,7 @@ namespace StudentManagementV1._5.ViewModels
         {
             if (subject == null) return;
             
-            MessageBox.Show($"View students for {subject.SubjectName} in {subject.ClassName} will be implemented in the next release.", 
+            MessageBox.Show($"Em xin loi chuc nang {subject.SubjectName} in {subject.ClassName} Chua duoc lam xong.", 
                 "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
             
             // For future implementation:
@@ -164,7 +164,7 @@ namespace StudentManagementV1._5.ViewModels
         {
             if (subject == null) return;
             
-            MessageBox.Show($"View schedule for {subject.SubjectName} in {subject.ClassName} will be implemented in the next release.", 
+            MessageBox.Show($"em xin loi {subject.SubjectName} se {subject.ClassName} se duoc lam sau.", 
                 "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
             
             // For future implementation:
