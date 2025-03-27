@@ -1,0 +1,246 @@
+<UserControl x:Class="StudentManagementV1._5.Views.ViewAssignmentsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StudentManagementV1._5.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="720" d:DesignWidth="1280">
+    <Grid>
+        <!-- Main Layout Grid -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Sidebar Menu -->
+        <Border Grid.Column="0" 
+                Background="#3F51B5" 
+                Padding="20">
+            <StackPanel>
+                <TextBlock Text="Student Portal" 
+                           Foreground="White" 
+                           FontSize="20" 
+                           FontWeight="Bold" 
+                           Margin="0,10,0,30" 
+                           TextAlignment="Center"/>
+
+                <TextBlock Text="{Binding WelcomeMessage}" 
+                           Foreground="White" 
+                           FontSize="14" 
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,30" 
+                           TextAlignment="Center"/>
+
+                <!-- Navigation Buttons -->
+                <Button Content="Dashboard" 
+                        Command="{Binding BackCommand}"
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="My Courses" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="Assignments" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"
+                        IsEnabled="False"/>
+                
+                <Button Content="My Submissions" 
+                        Style="{StaticResource NavButton}" 
+                        Margin="0,0,0,10"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Column="1" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Page Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Text="My Assignments" 
+                           FontSize="24" 
+                           FontWeight="Bold" 
+                           Margin="0,0,0,10"/>
+                <TextBlock Text="View and manage all your course assignments here." 
+                           Opacity="0.7"/>
+            </StackPanel>
+
+            <!-- Filters -->
+            <Grid Grid.Row="1" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search Box -->
+                <TextBox Grid.Column="0" 
+                         Margin="0,0,10,0" 
+                         Padding="10,5" 
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         FontSize="14"
+                         BorderThickness="1"
+                         BorderBrush="#E0E0E0">
+                    <TextBox.Resources>
+                        <Style TargetType="{x:Type Border}">
+                            <Setter Property="CornerRadius" Value="5"/>
+                        </Style>
+                    </TextBox.Resources>
+                </TextBox>
+
+                <!-- Filters -->
+                <ComboBox Grid.Column="1" 
+                          Margin="0,0,10,0" 
+                          Padding="10,5" 
+                          Width="150"
+                          ItemsSource="{Binding Subjects}"
+                          SelectedItem="{Binding SelectedSubject}"
+                          FontSize="14"/>
+
+                <ComboBox Grid.Column="2" 
+                          Margin="0,0,10,0" 
+                          Padding="10,5" 
+                          Width="150"
+                          ItemsSource="{Binding StatusOptions}"
+                          SelectedItem="{Binding FilterStatus}"
+                          FontSize="14"/>
+
+                <Button Grid.Column="3" 
+                        Margin="0,0,10,0" 
+                        Padding="15,5" 
+                        Content="Clear Filters"
+                        Command="{Binding ClearFiltersCommand}"/>
+
+                <Button Grid.Column="4" 
+                        Margin="0,0,0,0" 
+                        Padding="15,5" 
+                        Content="Refresh"
+                        Command="{Binding RefreshCommand}"/>
+            </Grid>
+
+            <!-- Content Area with Loading Indicator -->
+            <Grid Grid.Row="2">
+                <!-- Loading Indicator -->
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" 
+                            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="Loading assignments..." HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                    <ProgressBar IsIndeterminate="True" Width="200" Height="15"/>
+                </StackPanel>
+
+                <!-- Error Message -->
+                <TextBlock Text="{Binding ErrorMessage}" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"
+                           Foreground="#F44336"
+                           TextWrapping="Wrap"
+                           MaxWidth="500"
+                           Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"/>
+                
+                <!-- Assignment List -->
+                <ScrollViewer Visibility="{Binding HasAssignments, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ItemsControl ItemsSource="{Binding Assignments}" Margin="0,0,10,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,0,0,15" 
+                                        Padding="15" 
+                                        Background="White" 
+                                        BorderBrush="#E0E0E0" 
+                                        BorderThickness="1" 
+                                        CornerRadius="5">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Assignment Details -->
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding Title}" 
+                                                       FontWeight="Bold" 
+                                                       FontSize="16" 
+                                                       Margin="0,0,0,5"/>
+                                            
+                                            <TextBlock Text="{Binding Description}" 
+                                                       TextWrapping="Wrap" 
+                                                       Margin="0,0,0,10" 
+                                                       Opacity="0.7"
+                                                       MaxHeight="60"/>
+                                            
+                                            <WrapPanel Margin="0,0,0,5">
+                                                <TextBlock Text="Subject: " FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding SubjectName}" Margin="5,0,15,0"/>
+                                                
+                                                <TextBlock Text="Class: " FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding ClassName}" Margin="5,0,15,0"/>
+                                                
+                                                <TextBlock Text="Due: " FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding DueDate, StringFormat='{}{0:MMM dd, yyyy - HH:mm}'}" Margin="5,0,15,0"/>
+                                                
+                                                <TextBlock Text="Max Points: " FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding MaxPoints}" Margin="5,0,15,0"/>
+                                            </WrapPanel>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                                <Border Padding="5,2" 
+                                                        CornerRadius="3" 
+                                                        Background="{Binding SubmissionStatus, Converter={StaticResource StatusToColorConverter}}">
+                                                    <TextBlock Text="{Binding SubmissionStatus}" 
+                                                               Foreground="White" 
+                                                               FontSize="12"/>
+                                                </Border>
+                                                
+                                                <Border Padding="5,2" 
+                                                        CornerRadius="3" 
+                                                        Background="{Binding GetDueStatus, Converter={StaticResource StatusToColorConverter}}"
+                                                        Margin="10,0,0,0">
+                                                    <TextBlock Text="{Binding GetDueStatus}" 
+                                                               Foreground="White" 
+                                                               FontSize="12"/>
+                                                </Border>
+                                                
+                                                <StackPanel Orientation="Horizontal" 
+                                                           Visibility="{Binding Score, Converter={StaticResource NullableToVisibilityConverter}}"
+                                                           Margin="10,0,0,0">
+                                                    <TextBlock Text="Score: " FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding Score}"/>
+                                                    <TextBlock Text=" / "/>
+                                                    <TextBlock Text="{Binding MaxPoints}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        
+                                        <!-- Action Buttons -->
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="15,0,0,0">
+                                            <Button Content="View Details" 
+                                                    Margin="0,0,0,10" 
+                                                    Padding="15,5"
+                                                    Command="{Binding DataContext.ViewAssignmentDetailsCommand, 
+                                                             RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"/>
+                                            
+                                            <Button Content="Submit Work" 
+                                                    Padding="15,5"
+                                                    Background="#4CAF50" 
+                                                    Foreground="White"
+                                                    Command="{Binding DataContext.SubmitAssignmentCommand, 
+                                                             RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

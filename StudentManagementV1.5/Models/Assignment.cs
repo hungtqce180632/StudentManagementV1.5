@@ -47,6 +47,12 @@ namespace StudentManagementV1._5.Models
         // Số lượng bài đã nộp (không lưu trong DB, chỉ để hiển thị)
         public int SubmissionCount { get; set; }
 
+        // Trạng thái nộp bài của học sinh (không lưu trong DB, chỉ để hiển thị)
+        public string SubmissionStatus { get; set; } = "Not Submitted";
+        
+        // Điểm đã đạt được (không lưu trong DB, chỉ để hiển thị)
+        public int? Score { get; set; } = null;
+
         // Trạng thái hiện tại của bài tập (Draft, Published, Closed)
         public string Status { get; set; } = "Draft";
 

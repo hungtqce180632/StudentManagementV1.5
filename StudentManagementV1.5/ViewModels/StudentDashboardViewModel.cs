@@ -63,11 +63,19 @@ namespace StudentManagementV1._5.ViewModels
             WelcomeMessage = $"Welcome, {_authService.CurrentUser?.Username ?? "Student"}!";
 
             LogoutCommand = new RelayCommand(param => Logout());
+            
+            // Initialize navigation commands with clear purpose comments
+            
+            // Navigate to view all current and past assignments
             NavigateToViewAssignmentsCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.ViewAssignments));
+            
+            // Navigate to manage submissions for assignments
             NavigateToSubmissionManagementCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.SubmissionManagement));
             
-            // Add new command for My Courses navigation
+            // Navigate to view enrolled courses
             NavigateToMyCoursesCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.MyCourses));
+            
+            // Add any additional commands here
         }
 
         // 1. Phương thức đăng xuất

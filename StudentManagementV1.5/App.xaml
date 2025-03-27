@@ -26,14 +26,10 @@
                 <!-- Add our converter resource dictionary -->
                 <ResourceDictionary Source="/ResourceDictionaries/ConverterResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <!-- Các Converter toàn cục -->
-            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
-            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
-            <converters:BoolToActiveStatusConverter x:Key="BoolToActiveStatusConverter"/>
-            <converters:BoolToStatusColorConverter x:Key="BoolToStatusColorConverter"/>
-            <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+            
+            <!-- Additional converters not in ConverterResources -->
+            <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+            <converters:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter"/>
 
             <!-- Style cho các nút điều hướng trong dashboard -->
             <Style x:Key="NavButton" TargetType="Button">
