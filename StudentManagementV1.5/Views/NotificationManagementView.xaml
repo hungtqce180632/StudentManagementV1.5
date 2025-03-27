@@ -54,7 +54,8 @@
                       IsChecked="{Binding ShowExpired}"/>
             
             <Button Grid.Column="3" Content="+ Add Notification" Command="{Binding AddNotificationCommand}" 
-                    Background="#2196F3" Foreground="White" Padding="10,5"/>
+                    Background="#2196F3" Foreground="White" Padding="10,5"
+                    Visibility="{Binding CanModifyNotifications, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </Grid>
 
         <!-- Data Grid -->
@@ -78,7 +79,10 @@
                 <DataGridTemplateColumn Header="Actions" Width="150">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" 
+                                        Visibility="{Binding DataContext.CanModifyNotifications, 
+                                            RelativeSource={RelativeSource AncestorType=DataGrid}, 
+                                            Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Button Content="Edit" Command="{Binding DataContext.EditNotificationCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}" Margin="0,0,5,0" Padding="5,2"
                                         Background="#2196F3" Foreground="White"/>

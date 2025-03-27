@@ -146,6 +146,14 @@ namespace StudentManagementV1._5.ViewModels
         // 3. Khi được gọi, chuyển về màn hình dashboard
         public ICommand BackCommand { get; }
 
+        // Add this property to control whether the user can edit notifications
+        private bool _canModifyNotifications;
+        public bool CanModifyNotifications
+        {
+            get => _canModifyNotifications;
+            set => SetProperty(ref _canModifyNotifications, value);
+        }
+
         // 1. Constructor của lớp
         // 2. Khởi tạo các tham số và thiết lập lệnh
         // 3. Tải dữ liệu ban đầu từ cơ sở dữ liệu
@@ -155,10 +163,33 @@ namespace StudentManagementV1._5.ViewModels
             _authService = authService;
             _navigationService = navigationService;
 
-            AddNotificationCommand = new RelayCommand(param => OpenAddNotificationDialog());
-            EditNotificationCommand = new RelayCommand(param => OpenEditNotificationDialog(param as Notification), param => param != null);
-            DeleteNotificationCommand = new RelayCommand(async param => await DeleteNotificationAsync(param as Notification), param => param != null);
-            BackCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.AdminDashboard));
+            // Determine if the user can modify notifications based on their role
+            CanModifyNotifications = _authService.CurrentUser?.Role == "Admin";
+
+            // Initialize commands
+            if (CanModifyNotifications)
+            {
+                AddNotificationCommand = new RelayCommand(param => OpenAddNotificationDialog());
+                EditNotificationCommand = new RelayCommand(param => OpenEditNotificationDialog(param as Notification), param => param != null);
+                DeleteNotificationCommand = new RelayCommand(async param => await DeleteNotificationAsync(param as Notification), param => param != null);
+            }
+            else
+            {
+                // For non-admin users (like teachers), create disabled commands
+                AddNotificationCommand = new RelayCommand(param => { }, param => false);
+                EditNotificationCommand = new RelayCommand(param => { }, param => false);
+                DeleteNotificationCommand = new RelayCommand(param => { }, param => false);
+            }
+            
+            // This command is available for all roles
+            BackCommand = new RelayCommand(param => {
+                if (_authService.CurrentUser?.Role == "Admin")
+                    _navigationService.NavigateTo(AppViews.AdminDashboard);
+                else if (_authService.CurrentUser?.Role == "Teacher")
+                    _navigationService.NavigateTo(AppViews.TeacherDashboard);
+                else
+                    _navigationService.NavigateTo(AppViews.Login);
+            });
 
             // Load initial data
             LoadNotificationsAsync();

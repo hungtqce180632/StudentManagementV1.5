@@ -109,6 +109,9 @@ namespace StudentManagementV1._5.ViewModels
         public ICommand ViewClassScheduleCommand { get; }
         public ICommand SendNotificationCommand { get; }
 
+        // Make sure this command is defined and initialized correctly
+        public ICommand NavigateCommand { get; }
+
         // 1. Constructor của lớp
         // 2. Khởi tạo các tham số và thiết lập lệnh
         // 3. Tạo thông điệp chào mừng dựa trên thông tin người dùng
@@ -127,14 +130,17 @@ namespace StudentManagementV1._5.ViewModels
             NavigateToMySubjectsCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.MySubjects));
             
             // Initialize new navigation commands
-            NavigateToMyScheduleCommand = new RelayCommand(param => MessageBox.Show("Schedule view will be implemented in a future update.", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information));
-            NavigateToNotificationsCommand = new RelayCommand(param => MessageBox.Show("Notifications will be implemented in a future update.", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information));
+            NavigateToMyScheduleCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.MySchedule));
+            NavigateToNotificationsCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.NotificationManagement));
             
             // Quick action commands
             CreateNewAssignmentCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.AssignmentManagement));
             GradeSubmissionsCommand = new RelayCommand(param => MessageBox.Show("Grading interface will be implemented in a future update.", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information));
             ViewClassScheduleCommand = new RelayCommand(param => MessageBox.Show("Class schedule view will be implemented in a future update.", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information));
             SendNotificationCommand = new RelayCommand(param => MessageBox.Show("Notification sending will be implemented in a future update.", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information));
+
+            // Make sure this line exists to initialize the NavigateCommand
+            NavigateCommand = new RelayCommand(param => Navigate(param as string));
 
             // Load dashboard data
             LoadDashboardDataAsync();
@@ -277,6 +283,17 @@ namespace StudentManagementV1._5.ViewModels
         {
             _authService.Logout();
             _navigationService.NavigateTo(AppViews.Login);
+        }
+
+        // Make sure this method exists to handle navigation
+        private void Navigate(string viewName)
+        {
+            if (string.IsNullOrEmpty(viewName)) return;
+    
+            if (Enum.TryParse(viewName, out AppViews view))
+            {
+                _navigationService.NavigateTo(view);
+            }
         }
     }
 }

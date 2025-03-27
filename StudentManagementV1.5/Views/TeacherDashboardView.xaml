@@ -52,9 +52,10 @@
                         IsEnabled="False"/>
                 
                 <Button Content="My Subjects" 
-                        Command="{Binding NavigateToMySubjectsCommand}"
+                        Command="{Binding NavigateCommand}" 
+                        CommandParameter="MySubjects"
                         Style="{StaticResource NavButton}" 
-                        Margin="0,0,0,10"/>
+                        Margin="0,5"/>
                 
                 <Button Content="Assignments" 
                         Command="{Binding NavigateToAssignmentManagementCommand}"
@@ -62,9 +63,10 @@
                         Margin="0,0,0,10"/>
                 
                 <Button Content="My Schedule" 
-                        Command="{Binding NavigateToMyScheduleCommand}"
+                        Command="{Binding NavigateCommand}" 
+                        CommandParameter="MySchedule"
                         Style="{StaticResource NavButton}" 
-                        Margin="0,0,0,10"/>
+                        Margin="0,5"/>
                 
                 <Button Content="Notifications" 
                         Command="{Binding NavigateToNotificationsCommand}"
