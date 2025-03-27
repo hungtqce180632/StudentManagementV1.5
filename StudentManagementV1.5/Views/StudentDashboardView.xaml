@@ -52,6 +52,7 @@
                         IsEnabled="False"/>
                 
                 <Button Content="My Courses" 
+                        Command="{Binding NavigateToMyCoursesCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
                 

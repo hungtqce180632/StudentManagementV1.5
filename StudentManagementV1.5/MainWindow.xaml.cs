@@ -99,7 +99,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _emailService = new EmailService();
         
         // Setup navigation with parameter support
-        _navigationService = new Services.NavigationService(MainFrame, ResolveView, ResolveViewWithParameter);
+        _navigationService = new Services.NavigationService(MainFrame, ResolveView, _authService, ResolveViewWithParameter);
         
         // Setup login view
         _loginViewModel = new LoginViewModel(_authService, _navigationService);

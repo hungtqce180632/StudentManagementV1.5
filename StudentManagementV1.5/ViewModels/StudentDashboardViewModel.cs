@@ -26,9 +26,6 @@ namespace StudentManagementV1._5.ViewModels
         // 3. Được tạo dựa trên thông tin người dùng hiện tại
         private string _welcomeMessage = string.Empty;
 
-        // 1. Thông điệp chào mừng hiển thị trên dashboard
-        // 2. Binding đến TextBlock trong UI
-        // 3. Được tạo dựa trên thông tin người dùng hiện tại
         public string WelcomeMessage
         {
             get => _welcomeMessage;
@@ -50,6 +47,11 @@ namespace StudentManagementV1._5.ViewModels
         // 3. Khi được gọi, chuyển đến màn hình quản lý bài nộp
         public ICommand NavigateToSubmissionManagementCommand { get; }
 
+        // 1. Lệnh điều hướng đến màn hình khóa học của tôi
+        // 2. Binding đến nút "Khóa học của tôi" trong UI
+        // 3. Khi được gọi, chuyển đến màn hình hiển thị các khóa học học sinh đang học
+        public ICommand NavigateToMyCoursesCommand { get; }
+
         // 1. Constructor của lớp
         // 2. Khởi tạo các tham số và thiết lập lệnh
         // 3. Tạo thông điệp chào mừng dựa trên thông tin người dùng
@@ -63,6 +65,9 @@ namespace StudentManagementV1._5.ViewModels
             LogoutCommand = new RelayCommand(param => Logout());
             NavigateToViewAssignmentsCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.ViewAssignments));
             NavigateToSubmissionManagementCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.SubmissionManagement));
+            
+            // Add new command for My Courses navigation
+            NavigateToMyCoursesCommand = new RelayCommand(param => _navigationService.NavigateTo(AppViews.MyCourses));
         }
 
         // 1. Phương thức đăng xuất
