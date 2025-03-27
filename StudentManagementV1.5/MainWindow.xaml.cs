@@ -101,6 +101,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         // Setup navigation with parameter support
         _navigationService = new Services.NavigationService(MainFrame, ResolveView, _authService, ResolveViewWithParameter);
         
+        // Subscribe to the LogoutRequested event
+        _navigationService.LogoutRequested += OnLogoutRequested;
+        
         // Setup login view
         _loginViewModel = new LoginViewModel(_authService, _navigationService);
         _loginViewModel.LoginSuccessful += OnLoginSuccessful;
@@ -144,6 +147,21 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 MessageBox.Show("Unknown user role", "Navigation Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 break;
         }
+    }
+
+    // Add a method to handle the logout process
+    private void OnLogoutRequested(object sender, EventArgs e)
+    {
+        // Switch back to the login view
+        IsLoginVisible = true;
+        
+        // Reset the login view and its DataContext
+        _loginViewModel = new LoginViewModel(_authService, _navigationService);
+        _loginViewModel.LoginSuccessful += OnLoginSuccessful;
+        ShowLoginView();
+        
+        // Clear the MainFrame content
+        MainFrame.Content = null;
     }
 
     // 1. Phương thức phân giải các view từ enum AppViews

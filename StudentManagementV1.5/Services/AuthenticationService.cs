@@ -219,9 +219,10 @@ namespace StudentManagementV1._5.Services
 
         // 1. Phương thức đăng xuất
         // 2. Xóa thông tin người dùng hiện tại
-        // 3. Được gọi khi người dùng đăng xuất hoặc phiên hết hạn
+        // 3. Làm sạch bộ nhớ đệm người dùng
         public void Logout()
         {
+            // Clear the current user information
             _currentUser = null;
         }
     }

@@ -29,6 +29,9 @@ namespace StudentManagementV1._5.Services
         // Authentication service for use with MyCoursesViewModel
         private readonly AuthenticationService _authService;
 
+        // Add a new event to notify MainWindow when logout occurs
+        public event EventHandler LogoutRequested;
+
         // 1. Constructor của NavigationService
         // 2. Khởi tạo service với frame và hàm resolver
         // 3. Được gọi khi ứng dụng khởi động
@@ -47,6 +50,14 @@ namespace StudentManagementV1._5.Services
         // 3. Nạp UserControl vào frame để hiển thị
         public void NavigateTo(AppViews view)
         {
+            // Special handling for Login view to handle the logout scenario
+            if (view == AppViews.Login)
+            {
+                // Raise the event to notify MainWindow to handle the logout process
+                LogoutRequested?.Invoke(this, EventArgs.Empty);
+                return;
+            }
+            
             UserControl page;
             
             // Special handling for the MyCourses view since it requires special initialization
