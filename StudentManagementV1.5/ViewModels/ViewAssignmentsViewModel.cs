@@ -108,6 +108,9 @@ namespace StudentManagementV1._5.ViewModels
         public ICommand ViewAssignmentDetailsCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand ClearFiltersCommand { get; }
+        // New navigation commands
+        public ICommand NavigateToMyCoursesCommand { get; }
+        public ICommand NavigateToSubmissionManagementCommand { get; }
         
         // Constructor
         public ViewAssignmentsViewModel(DatabaseService databaseService, NavigationService navigationService, AuthenticationService authService)
@@ -122,6 +125,10 @@ namespace StudentManagementV1._5.ViewModels
             ViewAssignmentDetailsCommand = new RelayCommand(param => ViewAssignmentDetails(param as Assignment), param => param != null);
             RefreshCommand = new RelayCommand(_ => RefreshAssignmentsAsync());
             ClearFiltersCommand = new RelayCommand(_ => ClearFilters());
+            
+            // Initialize navigation commands
+            NavigateToMyCoursesCommand = new RelayCommand(_ => _navigationService.NavigateTo(AppViews.MyCourses));
+            NavigateToSubmissionManagementCommand = new RelayCommand(_ => _navigationService.NavigateTo(AppViews.SubmissionManagement));
             
             // Load initial data
             LoadInitialDataAsync();

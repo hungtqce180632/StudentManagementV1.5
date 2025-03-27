@@ -39,6 +39,7 @@
                         Margin="0,0,0,10"/>
                 
                 <Button Content="My Courses" 
+                        Command="{Binding NavigateToMyCoursesCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
                 
@@ -48,6 +49,7 @@
                         IsEnabled="False"/>
                 
                 <Button Content="My Submissions" 
+                        Command="{Binding NavigateToSubmissionManagementCommand}"
                         Style="{StaticResource NavButton}" 
                         Margin="0,0,0,10"/>
             </StackPanel>

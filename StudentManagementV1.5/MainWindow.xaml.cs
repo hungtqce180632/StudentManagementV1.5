@@ -190,6 +190,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 return new ViewAssignmentsView { DataContext = new ViewAssignmentsViewModel(_databaseService, _navigationService, _authService) };
             case AppViews.MyCourses:
                 return new MyCoursesView { DataContext = new MyCoursesViewModel(_authService, _navigationService) };
+            case AppViews.SubmissionManagement:
+                return new SubmissionManagementView { DataContext = new SubmissionManagementViewModel(_databaseService, _navigationService, _authService) };
 
             // Add the rest of the views as you implement them
             default:

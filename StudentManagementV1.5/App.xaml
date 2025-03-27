@@ -30,6 +30,8 @@
             <!-- Additional converters not in ConverterResources -->
             <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
             <converters:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter"/>
+            <converters:BoolToStatusColorConverter x:Key="BoolToStatusColorConverter"/>
+            <converters:BoolToActiveStatusConverter x:Key="BoolToActiveStatusConverter"/>
 
             <!-- Style cho các nút điều hướng trong dashboard -->
             <Style x:Key="NavButton" TargetType="Button">
